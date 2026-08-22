@@ -239,7 +239,10 @@ jobs:
           # (mis. sisa install dengan dev-dependency, sementara CI mengirim vendor
           # --no-dev) membuat artisan gagal boot dengan "Class ... not found",
           # sehingga perintah artisan apa pun mati sebelum sempat membersihkannya.
-          $WWW rm -f "$SITE"/bootstrap/cache/*.php
+          # find, bukan glob `rm -f .../*.php`: pola glob di-expand oleh shell user
+          # SSH sebelum sudo dijalankan, jadi kalau user itu tidak berhak membaca
+          # isi folder site polanya tidak cocok ke apa pun dan rm diam-diam no-op.
+          sudo -n find "$SITE/bootstrap/cache" -maxdepth 1 -name '*.php' -delete
 
           echo "==> [3/5] Migrasi database"
           $WWW php "$SITE/artisan" migrate --force --no-interaction
