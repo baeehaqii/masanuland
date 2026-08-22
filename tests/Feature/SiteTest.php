@@ -7,6 +7,7 @@ use App\Models\Project;
 use App\Models\Setting;
 use App\Models\User;
 use Database\Seeders\MasanulandSeeder;
+use Database\Seeders\SeoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -18,6 +19,10 @@ class SiteTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        // Produksi hanya menjalankan PHP-FPM, jadi head selalu datang dari Blade.
+        // Tanpa ini, gateway SSR lokal ikut menjawab dan menutupi tag yang diuji.
+        config(['inertia.ssr.enabled' => false]);
 
         $this->seed(MasanulandSeeder::class);
     }
@@ -95,6 +100,54 @@ class SiteTest extends TestCase
 
         $this->assertSame(1, PageView::count());
         $this->assertSame('/', PageView::first()->path);
+    }
+
+    public function test_setiap_halaman_punya_judul_dan_meta_sendiri_untuk_crawler(): void
+    {
+        $this->seed(SeoSeeder::class);
+
+        $project = Project::published()->first();
+
+        $this->get('/')
+            ->assertOk()
+            // Tanpa tag <title> penuh: kalau SSR aktif, tag itu dirender React.
+            ->assertSee('Masanuland — Perumahan Banyumas', escape: false)
+            ->assertSee('name="robots" content="index, follow"', escape: false)
+            ->assertSee('rel="canonical"', escape: false)
+            ->assertSee('perumahan banyumas', escape: false);
+
+        // Judul & og:image per perumahan dicetak server, bukan menunggu React.
+        $this->get('/perumahan/'.$project->slug)
+            ->assertOk()
+            ->assertSee($project->name.' — Masanuland', escape: false)
+            ->assertSee('property="og:image"', escape: false);
+
+        $this->get('/tentang-kami')->assertOk()->assertSee('Tentang Kami — Masanuland', escape: false);
+    }
+
+    public function test_sitemap_memuat_semua_halaman_dan_perumahan_tayang(): void
+    {
+        $hidden = Project::published()->first();
+        $hidden->update(['is_published' => false]);
+
+        $response = $this->get('/sitemap.xml')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/xml');
+
+        $response->assertSee(url('/tentang-kami'), escape: false)
+            ->assertSee(url('/testimoni'), escape: false)
+            ->assertDontSee(url('/perumahan/'.$hidden->slug), escape: false);
+
+        foreach (Project::published()->pluck('slug') as $slug) {
+            $response->assertSee(url('/perumahan/'.$slug), escape: false);
+        }
+    }
+
+    public function test_keywords_lama_berupa_string_tetap_tercetak(): void
+    {
+        Setting::current()->update(['seo' => ['keywords' => 'rumah murah, kpr']]);
+
+        $this->get('/')->assertOk()->assertSee('name="keywords" content="rumah murah, kpr"', escape: false);
     }
 
     private function superAdmin(): User

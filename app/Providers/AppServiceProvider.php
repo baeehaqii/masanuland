@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\Setting;
+use App\Support\PageSeo;
 use BezhanSalleh\FilamentShield\Facades\FilamentShield;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
@@ -35,7 +36,12 @@ class AppServiceProvider extends ServiceProvider
         View::composer('app', function ($view) {
             $site = Setting::current();
 
-            $view->with(['site' => $site, 'themeCss' => $site->themeCss()]);
+            $view->with([
+                'site' => $site,
+                'themeCss' => $site->themeCss(),
+                'seo' => PageSeo::for($site, $view->getData()['page'] ?? []),
+                'keywords' => PageSeo::keywords($site),
+            ]);
         });
     }
 

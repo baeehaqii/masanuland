@@ -57,7 +57,7 @@ class DefaultContent
                 'title' => 'Masanuland — Perumahan Purbalingga & Banyumas',
                 'title_suffix' => 'Masanuland',
                 'description' => 'Pengembang properti dan real estate di Purbalingga dan Banyumas. Hunian berkualitas, legalitas aman, rumah pasti dibangun.',
-                'keywords' => 'perumahan purbalingga, perumahan banyumas, rumah dijual purwokerto, masanuland',
+                'keywords' => self::seoKeywords(),
                 'robots' => 'index, follow',
                 'canonical' => null,
             ],
@@ -126,6 +126,23 @@ class DefaultContent
                 'hero_subtitle' => 'Cerita penghuni yang sudah menempati hunian kami.',
                 'empty_text' => 'Testimoni akan segera ditampilkan.',
             ],
+        ];
+    }
+
+    /**
+     * Kata kunci dasar; SeoSeeder menambahkan nama & lokasi perumahan.
+     *
+     * @return array<int, string>
+     */
+    public static function seoKeywords(): array
+    {
+        return [
+            'perumahan purbalingga',
+            'perumahan banyumas',
+            'rumah dijual purwokerto',
+            'perumahan sokaraja',
+            'developer properti banyumas',
+            'rumah kpr purbalingga',
         ];
     }
 }

@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -42,7 +43,10 @@ class SeoSettings extends SettingsPage
                         TextInput::make('seo.title_suffix')->label('Akhiran Judul Halaman')
                             ->helperText('Contoh: "Masanuland" → "Tentang Kami — Masanuland".'),
                         Textarea::make('seo.description')->label('Meta Description')->rows(3)->maxLength(200)->columnSpanFull(),
-                        TextInput::make('seo.keywords')->label('Keywords')->columnSpanFull(),
+                        TagsInput::make('seo.keywords')->label('Keywords')
+                            ->placeholder('perumahan purbalingga')
+                            ->helperText('Tekan Enter tiap selesai satu kata kunci.')
+                            ->columnSpanFull(),
                         Select::make('seo.robots')->label('Robots')->options([
                             'index, follow' => 'index, follow (tampil di Google)',
                             'noindex, nofollow' => 'noindex, nofollow (sembunyikan)',

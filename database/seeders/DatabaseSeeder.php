@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call(MasanulandSeeder::class);
         $this->call(MenuSeeder::class);
+        $this->call(SeoSeeder::class);
         $this->call(SiteMediaSeeder::class);
     }
 }
