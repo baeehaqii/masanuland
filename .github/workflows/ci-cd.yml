@@ -235,6 +235,11 @@ jobs:
           # laravel.log yang tak bisa ditulis membuat Laravel gagal MENCATAT error, dan
           # yang muncul di log CI adalah keluhan izin itu — bukan kesalahan aslinya.
           sudo -n chown -R "$APP_USER:$APP_USER" "$SITE/storage" "$SITE/bootstrap/cache"
+          # Dibuang dengan rm, bukan `optimize:clear`: manifest paket yang basi
+          # (mis. sisa install dengan dev-dependency, sementara CI mengirim vendor
+          # --no-dev) membuat artisan gagal boot dengan "Class ... not found",
+          # sehingga perintah artisan apa pun mati sebelum sempat membersihkannya.
+          $WWW rm -f "$SITE"/bootstrap/cache/*.php
 
           echo "==> [3/5] Migrasi database"
           $WWW php "$SITE/artisan" migrate --force --no-interaction
