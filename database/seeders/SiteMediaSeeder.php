@@ -18,7 +18,6 @@ class SiteMediaSeeder extends Seeder
         'images/hero-graha-ayodya.webp' => 'site/hero-graha-ayodya.webp',
         'images/hero-cluster-as-syifa.webp' => 'site/hero-cluster-as-syifa.webp',
         'images/about-fasad.webp' => 'site/about-fasad.webp',
-        'favicon.svg' => 'site/favicon.svg',
     ];
 
     public function run(): void
@@ -42,7 +41,6 @@ class SiteMediaSeeder extends Seeder
                 'site/hero-graha-ayodya.webp',
                 'site/hero-cluster-as-syifa.webp',
             ],
-            'favicon' => $site->favicon ?: 'site/favicon.svg',
             'page_home' => [
                 ...($site->page_home ?? []),
                 'about_image' => data_get($site->page_home, 'about_image') ?: 'site/about-fasad.webp',

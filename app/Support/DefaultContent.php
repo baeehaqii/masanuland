@@ -4,7 +4,7 @@ namespace App\Support;
 
 /**
  * The copy the website ships with. Written into the `settings` row by the CMS
- * migration, then edited at /admin — nothing reads this class at runtime.
+ * migration and by the seeders, then edited at /admin.
  */
 class DefaultContent
 {

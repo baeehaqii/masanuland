@@ -1,0 +1,289 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# Batalkan run lama bila ada push baru di branch yang sama
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    # Tanpa service database: phpunit.xml memaksa DB_CONNECTION=sqlite dengan
+    # :memory:, jadi MySQL produksi tidak pernah tersentuh di CI.
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        # 8.4 menyamai server (aaPanel /www/server/php/84). composer.json masih
+        # menulis "php": "^8.3", tapi menguji di versi yang dipakai produksi
+        # menghindari kejutan saat deploy.
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite, sqlite3, pdo_mysql, intl, zip, gd, bcmath
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Siapkan .env
+        # `composer setup` memanggil `artisan migrate --force`; DB_CONNECTION di
+        # .env.example adalah sqlite dan file-nya di-gitignore, jadi harus dibuat
+        # dulu — tanpa itu migrasi berhenti dengan "database does not exist".
+        run: |
+          cp .env.example .env
+          touch database/database.sqlite
+
+      - name: Setup Application
+        # composer install + key:generate + migrate + npm install + npm run build.
+        # Build ikut dijalankan supaya error Vite/Tailwind ketahuan di CI, bukan
+        # saat deploy.
+        run: composer setup
+
+      - name: Run CI Checks
+        # eslint + prettier + tsc + pint + phpstan + phpunit
+        run: composer ci:check
+
+      - name: Notify Telegram - Tests Failed
+        if: failure()
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          [ -n "${BOT_TOKEN}" ] && [ -n "${CHAT_ID}" ] || { echo "Secret Telegram belum diisi — notifikasi dilewati"; exit 0; }
+          TEXT=$(printf "❌ TESTS GAGAL - Deploy Dibatalkan!\n\nRepo: %s\nBranch: %s\nBy: %s\n\nDetail: %s" \
+            "${{ github.repository }}" "${{ github.ref_name }}" "${{ github.actor }}" "${RUN_URL}")
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${CHAT_ID}" \
+            --data-urlencode "text=${TEXT}"
+
+  deploy:
+    name: Deploy to Server
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    env:
+      # ── Ganti empat baris ini sesuai server ──────────────────────────────
+      DEPLOY_PATH: /www/wwwroot/masanuland.com
+      SITE_URL: https://masanuland.com
+      # APP_USER = pemilik site di aaPanel. artisan dijalankan sebagai user ini,
+      # jadi user yang salah meninggalkan file cache milik root yang tidak bisa
+      # ditulis PHP-FPM (muncul sebagai 500 di request berikutnya).
+      APP_USER: www
+      # Nama service PHP-FPM aaPanel; opcache tidak melihat file baru tanpa reload.
+      FPM_SERVICE: php-fpm-84
+      # ─────────────────────────────────────────────────────────────────────
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          extensions: pdo_sqlite, sqlite3, pdo_mysql, intl, zip, gd, bcmath
+          tools: composer:v2
+          coverage: none
+
+      - name: Setup Node
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Build aset & dependency produksi
+        # vendor/ dan public/build dirakit di sini, jadi server tidak perlu punya
+        # composer maupun Node sama sekali. .env sementara hanya pemuas
+        # post-autoload-dump (package:discover + filament:upgrade) dan Wayfinder
+        # yang memanggil artisan saat `vite build`; file ini dikecualikan dari
+        # rsync dan tidak pernah sampai ke server.
+        run: |
+          cp .env.example .env
+          touch database/database.sqlite
+          composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction --no-progress
+          npm ci
+          npm run build
+
+      - name: Siapkan SSH key
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.SSH_PORT || '2299' }}" -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Uji koneksi SSH
+        # Gagal autentikasi paling mahal kalau baru ketahuan setelah build dan
+        # rsync puluhan MB. Fingerprint aman dicetak (bukan isi kunci) dan bisa
+        # langsung dibandingkan dengan `ssh-keygen -lf ~/.ssh/authorized_keys` di server.
+        run: |
+          echo -n "Fingerprint CI: "; ssh-keygen -lf ~/.ssh/deploy_key || true
+          ssh -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/deploy_key \
+            -p "${{ secrets.SSH_PORT || '2299' }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            'echo "Login OK sebagai $(whoami) di $(hostname)"'
+
+      - name: Kirim kode + vendor + aset ke server (rsync sebagai user aplikasi)
+        run: |
+          # --delete membuang sisa rilis lama. Yang WAJIB dikecualikan karena hidup di
+          # server, bukan di git:
+          #   .env            = kredensial produksi (APP_KEY! ganti = semua sesi mati)
+          #   storage/        = log, cache, sesi, DAN semua gambar yang diunggah lewat
+          #                     CMS (storage/app/public/site, /projects) — hilang berarti
+          #                     banner, logo, dan foto perumahan 404
+          #   public/storage  = symlink ke storage/app/public
+          #   bootstrap/cache = cache milik proses di server
+          #   .user.ini / .well-known = milik aaPanel & ACME/SSL
+          # public/build TIDAK dikecualikan: di-gitignore tapi hasil `npm run build`
+          # di step sebelumnya, dan tanpa itu website tampil tanpa CSS/JS.
+          rsync -az --delete --no-perms --no-owner --no-group \
+            --rsync-path="sudo -n -u ${APP_USER} rsync" \
+            -e "ssh -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/deploy_key -p ${{ secrets.SSH_PORT || '2299' }}" \
+            --exclude='/.env' \
+            --exclude='/storage' \
+            --exclude='/public/storage' \
+            --exclude='/bootstrap/cache' \
+            --exclude='/database/database.sqlite' \
+            --exclude='/.git' \
+            --exclude='/.github' \
+            --exclude='/node_modules' \
+            --exclude='/tests' \
+            --exclude='.user.ini' \
+            --exclude='.well-known' \
+            ./ "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${DEPLOY_PATH}/"
+
+      - name: Jalankan proses deploy di server
+        id: deploy
+        run: |
+          ssh -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/deploy_key \
+            -p "${{ secrets.SSH_PORT || '2299' }}" "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            SITE="${DEPLOY_PATH}" SITE_URL="${SITE_URL}" APP_USER="${APP_USER}" FPM_SERVICE="${FPM_SERVICE}" \
+            'bash -s' <<'DEPLOY'
+          set -euo pipefail
+
+          echo "==> [1/5] Validasi lingkungan server"
+          # Sesi ssh non-interaktif tidak memuat profil, jadi php aaPanel harus
+          # ditambahkan ke PATH manual. PHP 8.4 dipatok, bukan sekadar `php` apa pun
+          # yang kebetulan lebih dulu di PATH — Filament 5 + Laravel 13 tidak jalan
+          # di PHP lama, dan yang muncul cuma parse error tanpa konteks.
+          for d in /usr/local/bin /www/server/php/84/bin; do
+            [ -d "$d" ] && PATH="$d:$PATH"
+          done
+          export PATH
+          command -v php >/dev/null || { echo "ERROR: php tidak ada di PATH"; exit 1; }
+          echo "  php : $(php -r 'echo PHP_VERSION;')"
+          # Semua pemeriksaan berkas di dalam site lewat sudo: foldernya milik $APP_USER
+          # dan tertutup untuk user deploy, jadi `[ -f ... ]` polos menjawab "tidak ada"
+          # untuk berkas yang sebenarnya ada — pesan errornya menuduh rsync tanpa alasan.
+          sudo -n test -f "$SITE/artisan" || { echo "ERROR: $SITE/artisan tidak ada — rsync gagal?"; exit 1; }
+          # Tanpa .env, Laravel hidup tapi mati begitu menyentuh database.
+          sudo -n test -f "$SITE/.env" || { echo "ERROR: $SITE/.env belum dibuat di server"; exit 1; }
+          # Aset hasil build wajib ikut terkirim; tanpa manifest, @vite melempar
+          # "Vite manifest not found" dan seluruh website blank.
+          sudo -n test -f "$SITE/public/build/manifest.json" || { echo "ERROR: public/build belum ada — step build gagal?"; exit 1; }
+
+          # artisan dijalankan sebagai pemilik site, bukan root. HOME ikut diarahkan
+          # supaya cache artisan tidak jatuh ke /root.
+          APP_HOME=$(getent passwd "$APP_USER" | cut -d: -f6)
+          [ -d "$APP_HOME" ] || { echo "ERROR: home $APP_USER ($APP_HOME) tidak ada"; exit 1; }
+          WWW="sudo -n -u $APP_USER env HOME=$APP_HOME PATH=$PATH"
+
+          echo "==> [2/5] Folder tulis"
+          # Dikecualikan rsync, jadi harus dipastikan ada sendiri (dan tetap ada
+          # setelah --delete membersihkan yang lain). storage/app/public menampung
+          # semua unggahan CMS — FILESYSTEM_DISK=public.
+          $WWW mkdir -p "$SITE/storage/app/public/site" "$SITE/storage/app/public/projects" \
+                        "$SITE/storage/framework/cache/data" "$SITE/storage/framework/sessions" \
+                        "$SITE/storage/framework/views" "$SITE/storage/logs" "$SITE/bootstrap/cache"
+          # Satu berkas milik root di dalam storage sudah cukup untuk menjatuhkan deploy:
+          # laravel.log yang tak bisa ditulis membuat Laravel gagal MENCATAT error, dan
+          # yang muncul di log CI adalah keluhan izin itu — bukan kesalahan aslinya.
+          sudo -n chown -R "$APP_USER:$APP_USER" "$SITE/storage" "$SITE/bootstrap/cache"
+
+          echo "==> [3/5] Migrasi database"
+          $WWW php "$SITE/artisan" migrate --force --no-interaction
+
+          echo "==> [4/5] Cache konfigurasi & aset"
+          # Symlink hilang tiap kali site dibuat ulang; semua gambar CMS 404 tanpa ini.
+          sudo -n test -L "$SITE/public/storage" || $WWW php "$SITE/artisan" storage:link
+          # Cache lama dibuang dulu: config:cache yang gagal di tengah meninggalkan
+          # bootstrap/cache/config.php basi yang dipakai request berikutnya.
+          $WWW php "$SITE/artisan" optimize:clear
+          $WWW php "$SITE/artisan" optimize
+          # Panel Filament: cache komponen, ikon, dan Blade-nya.
+          $WWW php "$SITE/artisan" filament:optimize
+          # Bukti Laravel benar-benar bisa boot dengan config hasil cache barusan —
+          # gerbang sesungguhnya, karena jalur HTTP di bawah bisa gagal karena SSL.
+          $WWW php "$SITE/artisan" about --only=environment >/dev/null
+
+          echo "==> [5/5] Reload PHP-FPM & cek kesehatan"
+          # PHP-FPM menyimpan bytecode lama di opcache sampai di-reload; tanpa ini
+          # kode baru sudah di disk tapi yang dilayani masih versi sebelumnya.
+          sudo -n systemctl reload "$FPM_SERVICE" 2>/dev/null \
+            || sudo -n /etc/init.d/"$FPM_SERVICE" reload 2>/dev/null \
+            || echo "  PERINGATAN: gagal reload $FPM_SERVICE — kode PHP baru mungkin belum aktif"
+
+          CODE=000
+          for i in 1 2 3 4 5; do
+            sleep 2
+            CODE=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "$SITE_URL/up" || echo 000)
+            [ "$CODE" = "200" ] && break
+          done
+          ADMIN=$(curl -s -o /dev/null -m 20 -w '%{http_code}' "$SITE_URL/admin" || echo 000)
+          echo "  http : $SITE_URL/up    -> $CODE"
+          echo "  panel: $SITE_URL/admin -> $ADMIN (302 ke login itu normal)"
+          case "$CODE" in
+            200) ;;
+            # 000 = domain/SSL belum jadi di aaPanel. Wajar pada deploy pertama,
+            # dan kode di server sudah terbukti boot lewat `artisan about`.
+            000) echo "  PERINGATAN: $SITE_URL belum bisa dijangkau — cek site & SSL di aaPanel" ;;
+            *)   echo "ERROR: $SITE_URL/up menjawab $CODE — aplikasi error setelah deploy"
+                 sudo -n tail -50 "$SITE/storage/logs/laravel.log" 2>/dev/null || true
+                 exit 1 ;;
+          esac
+
+          echo "==> DEPLOY SELESAI"
+          DEPLOY
+
+      - name: Notify Telegram - Deploy Result
+        if: always()
+        env:
+          BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          [ -n "${BOT_TOKEN}" ] && [ -n "${CHAT_ID}" ] || { echo "Secret Telegram belum diisi — notifikasi dilewati"; exit 0; }
+          if [ "${{ steps.deploy.outcome }}" = "success" ]; then
+            TEXT=$(printf "✅ DEPLOY BERHASIL!\n\nRepo: %s\nBranch: %s\nBy: %s\n\nWebsite Masanuland sudah live! 🚀\n%s" \
+              "${{ github.repository }}" "${{ github.ref_name }}" "${{ github.actor }}" "${SITE_URL}")
+          else
+            TEXT=$(printf "❌ DEPLOY GAGAL!\n\nRepo: %s\nBranch: %s\nBy: %s\n\nProses deploy di server error. Cek detail: %s" \
+              "${{ github.repository }}" "${{ github.ref_name }}" "${{ github.actor }}" "${RUN_URL}")
+          fi
+          curl -s -X POST "https://api.telegram.org/bot${BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${CHAT_ID}" \
+            --data-urlencode "text=${TEXT}"
