@@ -12,6 +12,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
+use Filament\Support\RawJs;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -26,7 +27,10 @@ class HouseTypesRelationManager extends RelationManager
     {
         return $schema->components([
             TextInput::make('name')->label('Nama Tipe')->required()->placeholder('T-45/72'),
-            TextInput::make('price_label')->label('Harga')->placeholder('Rp 450.000.000 ,-'),
+            TextInput::make('price')->label('Harga')
+                ->prefix('Rp')->numeric()
+                ->mask(RawJs::make("\$money(\$input, ',', '.', 0)"))
+                ->stripCharacters('.'),
             FileUpload::make('image')->label('Gambar')->image()->directory('house-types'),
             TextInput::make('brochure_url')->label('Link Brosur')->url(),
             TextInput::make('sort')->label('Urutan')->numeric()->default(0),
@@ -51,7 +55,8 @@ class HouseTypesRelationManager extends RelationManager
             ->columns([
                 ImageColumn::make('image')->label('')->imageHeight(40),
                 TextColumn::make('name')->label('Tipe')->searchable(),
-                TextColumn::make('price_label')->label('Harga'),
+                TextColumn::make('price')->label('Harga')->sortable()
+                    ->formatStateUsing(fn (?int $state): ?string => $state ? 'Rp '.number_format($state, 0, ',', '.') : null),
             ])
             ->headerActions([CreateAction::make()])
             ->recordActions([EditAction::make(), DeleteAction::make()])

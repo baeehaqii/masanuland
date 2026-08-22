@@ -76,7 +76,7 @@ class MasanulandSeeder extends Seeder
                 'house_types' => [
                     [
                         'name' => 'T-45/72',
-                        'price_label' => 'Rp 450.000.000 ,-',
+                        'price' => 450000000,
                         'specs' => [
                             ['count' => 2, 'label' => 'Kamar Tidur'],
                             ['count' => 1, 'label' => 'Kamar Mandi'],
@@ -87,7 +87,7 @@ class MasanulandSeeder extends Seeder
                     ],
                     [
                         'name' => 'T-60/90',
-                        'price_label' => 'Rp 620.000.000 ,-',
+                        'price' => 620000000,
                         'specs' => [
                             ['count' => 3, 'label' => 'Kamar Tidur'],
                             ['count' => 2, 'label' => 'Kamar Mandi'],
@@ -118,7 +118,7 @@ class MasanulandSeeder extends Seeder
                 'house_types' => [
                     [
                         'name' => 'T-36/60',
-                        'price_label' => 'Rp 395.000.000 ,-',
+                        'price' => 395000000,
                         'specs' => [
                             ['count' => 2, 'label' => 'Kamar Tidur'],
                             ['count' => 1, 'label' => 'Kamar Mandi'],
@@ -150,7 +150,7 @@ class MasanulandSeeder extends Seeder
                 'house_types' => [
                     [
                         'name' => 'T-50/80',
-                        'price_label' => 'Rp 520.000.000 ,-',
+                        'price' => 520000000,
                         'specs' => [
                             ['count' => 2, 'label' => 'Kamar Tidur'],
                             ['count' => 1, 'label' => 'Kamar Mandi'],
@@ -161,7 +161,6 @@ class MasanulandSeeder extends Seeder
                     ],
                     [
                         'name' => '2 Lantai / 90',
-                        'price_label' => 'Hubungi CS',
                         'specs' => [
                             ['count' => 3, 'label' => 'Kamar Tidur'],
                             ['count' => 2, 'label' => 'Kamar Mandi'],

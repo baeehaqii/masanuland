@@ -312,10 +312,12 @@ export default function ProjectPage({ project }: { project: Project }) {
                                                     </dl>
 
                                                     <p className="mt-5 text-xs font-semibold tracking-widest text-maroon-900/50 uppercase">
-                                                        Harga
+                                                        {page.price_label ??
+                                                            'Harga'}
                                                     </p>
                                                     <p className="text-xl font-extrabold text-maroon">
-                                                        {type.price_label ??
+                                                        {rupiah(type.price) ??
+                                                            page.price_empty ??
                                                             'Hubungi CS'}
                                                     </p>
 

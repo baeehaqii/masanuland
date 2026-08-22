@@ -9,7 +9,7 @@ class HouseType extends Model
 {
     protected $guarded = [];
 
-    protected $casts = ['specs' => 'array'];
+    protected $casts = ['specs' => 'array', 'price' => 'integer'];
 
     /** @return BelongsTo<Project, $this> */
     public function project(): BelongsTo

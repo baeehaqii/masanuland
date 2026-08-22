@@ -134,7 +134,7 @@ export interface HouseType {
     id: number;
     name: string;
     image: string | null;
-    price_label: string | null;
+    price: number | null;
     specs: Spec[] | null;
     brochure_url: string | null;
 }

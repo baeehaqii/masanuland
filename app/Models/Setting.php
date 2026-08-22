@@ -51,9 +51,19 @@ class Setting extends Model
             ->implode('');
     }
 
+    /** "0858-1050-4000" → "6285810504000"; WhatsApp menolak awalan 0. */
+    public static function waNumber(?string $number): string
+    {
+        $digits = preg_replace('/\D/', '', (string) $number);
+
+        return str_starts_with((string) $digits, '0')
+            ? '62'.substr((string) $digits, 1)
+            : (string) $digits;
+    }
+
     public function waLink(?string $text = null): string
     {
-        $number = preg_replace('/\D/', '', (string) $this->whatsapp);
+        $number = static::waNumber($this->whatsapp);
 
         return 'https://api.whatsapp.com/send/?phone='.$number
             .'&text='.urlencode($text ?? $this->whatsapp_text ?? 'Halo, mohon informasi perumahannya.');

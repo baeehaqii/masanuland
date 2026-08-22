@@ -24,7 +24,7 @@ class MasterButtons extends SettingsPage
     /** @return array<int, string> */
     protected function settingKeys(): array
     {
-        return ['buttons', 'brochure_url'];
+        return ['buttons', 'brochure_url', 'phone', 'whatsapp'];
     }
 
     public function form(Schema $schema): Schema
@@ -32,14 +32,25 @@ class MasterButtons extends SettingsPage
         return $schema
             ->statePath('data')
             ->components([
-                Section::make('Tombol Utama')->schema([
-                    TextInput::make('buttons.whatsapp_label')->label('Tombol WhatsApp (Desktop)')->placeholder('WhatsApp'),
-                    TextInput::make('buttons.whatsapp_mobile_label')->label('Tombol WhatsApp (Mobile)')->placeholder('Hubungi via WhatsApp'),
-                    TextInput::make('buttons.brochure_label')->label('Tombol Brosur')->placeholder('Brosur & Harga'),
-                    TextInput::make('buttons.detail_label')->label('Tombol Detail Perumahan')->placeholder('Lihat Detail'),
-                    TextInput::make('brochure_url')->label('Link Brosur & Harga')->url()
-                        ->helperText('Kosongkan untuk mengarahkan ke WhatsApp.')->columnSpanFull(),
-                ])->columns(2)->columnSpanFull(),
+                Section::make('Nomor Tujuan')
+                    ->description('Nomor yang dipakai semua tombol WhatsApp dan CTA. Sama dengan yang ada di Kontak & Sosial.')
+                    ->schema([
+                        TextInput::make('whatsapp')->label('Nomor WhatsApp')->placeholder('6285810504000')
+                            ->helperText('Boleh diawali 0 — otomatis diubah ke 62 saat membuka WhatsApp.'),
+                        TextInput::make('phone')->label('Nomor Telepon')->placeholder('0858-1050-4000')
+                            ->helperText('Tampil sebagai teks tombol CTA bawah halaman kalau teksnya dikosongkan.'),
+                    ])->columns(2)->columnSpanFull(),
+
+                Section::make('Tombol Utama')
+                    ->description('Isi tulisan yang tampil di tombol, bukan nomornya.')
+                    ->schema([
+                        TextInput::make('buttons.whatsapp_label')->label('Tombol WhatsApp Navbar (Desktop)')->placeholder('WhatsApp'),
+                        TextInput::make('buttons.whatsapp_mobile_label')->label('Tombol WhatsApp Navbar (Mobile)')->placeholder('Hubungi via WhatsApp'),
+                        TextInput::make('buttons.brochure_label')->label('Tombol Brosur')->placeholder('Brosur & Harga'),
+                        TextInput::make('buttons.detail_label')->label('Tombol Detail Perumahan')->placeholder('Lihat Detail'),
+                        TextInput::make('brochure_url')->label('Link Brosur & Harga')->url()
+                            ->helperText('Kosongkan untuk mengarahkan ke WhatsApp.')->columnSpanFull(),
+                    ])->columns(2)->columnSpanFull(),
 
                 Section::make('CTA Bawah Halaman')->schema([
                     TextInput::make('buttons.cta_title')->label('Judul CTA')->placeholder('Info Lebih Lanjut, Klik'),

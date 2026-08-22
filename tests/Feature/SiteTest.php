@@ -196,4 +196,21 @@ class SiteTest extends TestCase
 
         $this->assertStringContainsString('phone=628123456789', $site->waLink('hai'));
     }
+
+    public function test_nomor_whatsapp_berawalan_nol_diubah_ke_kode_negara(): void
+    {
+        $site = Setting::current();
+        $site->update(['whatsapp' => '0858-1050-4000']);
+
+        // Tanpa ini, tautan wa.me dengan awalan 0 dibuka lalu gagal menemukan nomor.
+        $this->assertStringContainsString('phone=6285810504000', $site->waLink('hai'));
+    }
+
+    public function test_harga_tipe_rumah_tersimpan_sebagai_angka(): void
+    {
+        $type = Project::first()->houseTypes()->first();
+
+        $this->assertIsInt($type->price);
+        $this->assertGreaterThan(0, $type->price);
+    }
 }

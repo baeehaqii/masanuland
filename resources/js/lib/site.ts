@@ -17,8 +17,15 @@ export function rupiah(value?: number | null): string | null {
     return `Rp ${value.toLocaleString('id-ID')} ,-`;
 }
 
+/** "0858-1050-4000" → "6285810504000"; WhatsApp menolak awalan 0. */
+export function waNumber(value?: string | null): string {
+    const digits = (value ?? '').replace(/\D/g, '');
+
+    return digits.startsWith('0') ? `62${digits.slice(1)}` : digits;
+}
+
 export function waLink(site: Site, text?: string): string {
-    const number = (site.whatsapp ?? '').replace(/\D/g, '');
+    const number = waNumber(site.whatsapp);
     const message =
         text ??
         site.whatsapp_text ??
