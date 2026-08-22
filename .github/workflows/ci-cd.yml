@@ -147,6 +147,18 @@ jobs:
             "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
             'echo "Login OK sebagai $(whoami) di $(hostname)"'
 
+      - name: Samakan pemilik file di server
+        # Perintah manual di server (composer/npm/artisan sebagai root) meninggalkan
+        # file milik root, sementara rsync di bawah jalan sebagai $APP_USER dan tidak
+        # bisa menimpa atau menghapusnya — gagal dengan "Permission denied (13)".
+        # Disamakan tiap deploy supaya sekali pegang server sebagai root tidak
+        # mematikan deploy berikutnya.
+        run: |
+          ssh -o BatchMode=yes -o IdentitiesOnly=yes -i ~/.ssh/deploy_key \
+            -p "${{ secrets.SSH_PORT || '2299' }}" \
+            "${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}" \
+            "sudo -n chown -R ${APP_USER}:${APP_USER} ${DEPLOY_PATH}"
+
       - name: Kirim kode + vendor + aset ke server (rsync sebagai user aplikasi)
         run: |
           # --delete membuang sisa rilis lama. Yang WAJIB dikecualikan karena hidup di
