@@ -6,6 +6,7 @@ use App\Models\PageView;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\User;
+use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\MasanulandSeeder;
 use Database\Seeders\SeoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -154,6 +155,31 @@ class SiteTest extends TestCase
         Setting::current()->update(['seo' => ['keywords' => 'rumah murah, kpr']]);
 
         $this->get('/')->assertOk()->assertSee('name="keywords" content="rumah murah, kpr"', escape: false);
+    }
+
+    public function test_seeder_ulang_tidak_menimpa_konten_yang_sudah_diedit(): void
+    {
+        $project = Project::first();
+        $project->update([
+            'card_image' => 'projects/foto-asli.jpg',
+            'price_from' => 166_000_000,
+            'tagline' => 'Tagline hasil editan',
+        ]);
+
+        Setting::current()->update(['brand_name' => 'Nama Baru', 'tagline' => 'Tagline situs']);
+
+        // Persis yang dijalankan orang di server saat menambah data awal.
+        $this->seed(DatabaseSeeder::class);
+
+        $project->refresh();
+        $this->assertSame('projects/foto-asli.jpg', $project->card_image);
+        $this->assertSame(166_000_000, $project->price_from);
+        $this->assertSame('Tagline hasil editan', $project->tagline);
+        $this->assertSame('Nama Baru', Setting::current()->brand_name);
+        $this->assertSame('Tagline situs', Setting::current()->tagline);
+
+        // Tetap tidak menggandakan tipe rumah.
+        $this->assertSame(2, $project->houseTypes()->count());
     }
 
     private function superAdmin(): User

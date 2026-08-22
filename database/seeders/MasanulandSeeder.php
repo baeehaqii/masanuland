@@ -7,14 +7,20 @@ use App\Models\Setting;
 use Illuminate\Database\Seeder;
 
 /**
- * Starter content. Every value here is editable at /admin — the numbers,
- * prices and distances are placeholders until the real data is entered.
+ * Isi awal untuk instalasi baru. Semua nilai di sini bisa diedit di /admin.
+ *
+ * AMAN DIULANG: hanya mengisi yang masih kosong. Perumahan yang sudah ada
+ * tidak disentuh sama sekali, jadi menjalankan `php artisan db:seed` di server
+ * tidak akan menimpa harga, gambar, atau teks yang sudah Anda ubah di panel.
  */
 class MasanulandSeeder extends Seeder
 {
     public function run(): void
     {
-        Setting::current()->update([
+        $site = Setting::current();
+
+        // Hanya isian yang masih kosong yang diisi — nilai hasil editan menang.
+        $site->update(collect([
             'brand_name' => 'Masanuland',
             'hero_title' => 'Bangunlah Rumahnya',
             'hero_subtitle' => 'Bangun Ceritanya',
@@ -45,7 +51,7 @@ class MasanulandSeeder extends Seeder
                 ['label' => 'TikTok', 'url' => 'https://tiktok.com/@masanuland.id'],
                 ['label' => 'YouTube', 'url' => 'https://youtube.com/@masanuland'],
             ],
-        ]);
+        ])->reject(fn ($value, string $key) => filled($site->{$key}))->all());
 
         $projects = [
             [
@@ -172,11 +178,16 @@ class MasanulandSeeder extends Seeder
             $types = $data['house_types'];
             unset($data['house_types']);
 
-            $project = Project::updateOrCreate(['slug' => $data['slug']], $data);
-            $project->houseTypes()->delete();
+            // firstOrCreate, bukan updateOrCreate: perumahan yang sudah ada di
+            // panel biarkan apa adanya, termasuk gambar dan harga hasil editan.
+            $project = Project::firstOrCreate(['slug' => $data['slug']], $data);
+
+            if (! $project->wasRecentlyCreated) {
+                continue;
+            }
 
             foreach ($types as $i => $type) {
-                $project->houseTypes()->updateOrCreate(['name' => $type['name']], $type + ['sort' => $i]);
+                $project->houseTypes()->create($type + ['sort' => $i]);
             }
         }
     }
