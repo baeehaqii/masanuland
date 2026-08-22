@@ -1,0 +1,76 @@
+@import 'tailwindcss';
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@theme {
+    --font-sans:
+        'Poppins', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji',
+        'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* Masanuland palette — maroon dominant. */
+    --color-maroon-50: #fdf3f4;
+    --color-maroon-100: #fbe4e6;
+    --color-maroon-200: #f6ccd1;
+    --color-maroon-400: #c9364b;
+    --color-maroon-500: #a4162a;
+    --color-maroon: #7a0f1b;
+    --color-maroon-700: #650c17;
+    --color-maroon-800: #4f0810;
+    --color-maroon-900: #37050b;
+    --color-gold: #c9962c;
+    --color-gold-dark: #a87b1c;
+    --color-wa: #25d366;
+    --color-wa-dark: #1da851;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+}
+
+@utility hero-stroke {
+    -webkit-text-stroke: 2px var(--color-maroon-900);
+    paint-order: stroke fill;
+}
+
+@theme {
+    /* Matches the promo banner background so letterboxed slides look seamless. */
+    --color-brick: #932922;
+}
+
+@layer base {
+    /* One visible focus ring for the whole site — keyboard users get it, mice don't. */
+    :focus-visible {
+        outline: 3px solid var(--color-gold);
+        outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+/* Swipe tracks scroll natively; the bar itself is noise. */
+@utility no-scrollbar {
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+/* Keeps the floating WhatsApp button clear of iOS home-bar gestures. */
+@utility pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+}
