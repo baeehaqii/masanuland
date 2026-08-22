@@ -234,7 +234,14 @@ jobs:
           # Satu berkas milik root di dalam storage sudah cukup untuk menjatuhkan deploy:
           # laravel.log yang tak bisa ditulis membuat Laravel gagal MENCATAT error, dan
           # yang muncul di log CI adalah keluhan izin itu — bukan kesalahan aslinya.
-          sudo -n chown -R "$APP_USER:$APP_USER" "$SITE/storage" "$SITE/bootstrap/cache"
+          # Garis miring di belakang disengaja: kalau storage ternyata symlink,
+          # tanpa itu chown hanya menyentuh symlink-nya, bukan isinya.
+          sudo -n chown -R "$APP_USER:$APP_USER" "$SITE/storage/" "$SITE/bootstrap/cache/"
+          # Unggahan CMS dilayani nginx langsung. Berkas yang pernah disalin ke server
+          # sebagai root sering bermode 0600 dan menjawab 403 walau ada — gambar terlihat
+          # "hilang" padahal cuma tidak boleh dibaca.
+          sudo -n chmod -R u=rwX,go=rX "$SITE/storage/app/public/"
+          echo "  unggahan: $(sudo -n find "$SITE/storage/app/public" -type f | wc -l | tr -d ' ') berkas"
           # Dibuang dengan rm, bukan `optimize:clear`: manifest paket yang basi
           # (mis. sisa install dengan dev-dependency, sementara CI mengirim vendor
           # --no-dev) membuat artisan gagal boot dengan "Class ... not found",
