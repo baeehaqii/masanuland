@@ -20,7 +20,7 @@ class PageTestimonials extends SettingsPage
 
     protected static ?string $navigationLabel = 'Testimoni';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 4;
 
     /** @return array<int, string> */
     protected function settingKeys(): array

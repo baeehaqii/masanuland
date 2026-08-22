@@ -24,11 +24,15 @@ return new class extends Migration
             $table->json('page_testimonials')->nullable();
         });
 
-        // Ship the panel with the copy that used to be hard-coded in the React pages.
-        DB::table('settings')->update(array_map(
-            fn ($value) => json_encode($value),
-            DefaultContent::all(),
-        ));
+        // Isi bawaan yang dulu hard-coded di halaman React. Disaring ke kolom yang
+        // sudah ada saat migrasi ini jalan — DefaultContent terus bertambah, dan
+        // kunci yang lahir di migrasi berikutnya belum punya kolom di sini.
+        DB::table('settings')->update(
+            collect(DefaultContent::all())
+                ->only(Schema::getColumnListing('settings'))
+                ->map(fn ($value) => json_encode($value))
+                ->all()
+        );
 
         Schema::create('page_views', function (Blueprint $table) {
             $table->id();

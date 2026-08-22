@@ -60,9 +60,15 @@ class SiteTest extends TestCase
         $this->get('/admin/users')->assertOk();
         $this->get('/admin/shield/roles')->assertOk();
 
-        foreach (['page-home', 'page-about', 'page-testimonials', 'manage-menu', 'theme-settings'] as $page) {
+        foreach (['page-home', 'page-about', 'page-project', 'page-testimonials', 'manage-menu', 'theme-settings'] as $page) {
             $this->get('/admin/'.$page)->assertOk();
         }
+
+        // Semua section di website punya field-nya di panel.
+        $this->get('/admin/page-home')->assertOk()
+            ->assertSee('Statistik')->assertSee('Poin Keunggulan')->assertSee('Deskripsi');
+        $this->get('/admin/page-project')->assertOk()
+            ->assertSee('Fasilitas')->assertSee('Siteplan');
 
         $this->get('/admin/master-identity')->assertOk()->assertSee('Nama Brand');
         $this->get('/admin/master-contact')->assertOk()->assertSee('Nomor WhatsApp');

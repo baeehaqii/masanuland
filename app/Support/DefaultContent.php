@@ -76,6 +76,7 @@ class DefaultContent
                 'about_link_label' => 'Selengkapnya',
                 'projects_title' => 'Lokasi Unggulan',
                 'projects_subtitle' => 'Pilih hunian yang paling dekat dengan aktivitas harian Anda.',
+                'projects_empty' => 'Perumahan akan segera ditampilkan.',
                 'why_title' => 'Developer Terpercaya',
                 'why_subtitle' => 'Tiga hal yang kami pegang di setiap unit yang kami serahkan.',
                 'reasons' => [
@@ -100,6 +101,7 @@ class DefaultContent
                 ],
                 'name_conclusion' => 'MASANU bermakna “Era Keberkahan dan Kebaikan yang Melintasi Waktu”.',
                 'visi_title' => 'Visi & Misi',
+                'visi_label' => 'Visi Perusahaan',
                 'visi' => 'Menjadi pengembang properti terpercaya yang menghadirkan hunian berkualitas, bernilai, dan memberikan keberkahan serta pertumbuhan berkelanjutan bagi masyarakat dan lingkungan.',
                 'misi_title' => 'Misi Perusahaan',
                 'misi' => [
@@ -121,6 +123,21 @@ class DefaultContent
                 ],
                 'stats_title' => 'Angka Kami',
             ],
+            'page_project' => [
+                'price_label' => 'Harga Mulai',
+                'price_empty' => 'Hubungi CS',
+                'contact_label' => 'Hubungi Kami',
+                'brochure_label' => 'Download Brosur',
+                'minutes_suffix' => 'Menit',
+                'features_title' => 'Fasilitas & Keunggulan',
+                'siteplan_title' => 'Siteplan & Denah',
+                'siteplan_tab' => 'Siteplan',
+                'types_tab' => 'Denah & Tipe',
+                'update_title' => 'Update Terkini',
+                'location_title' => 'Lokasi',
+                'maps_label' => 'Buka di Google Maps',
+            ],
+
             'page_testimonials' => [
                 'hero_title' => 'Testimoni',
                 'hero_subtitle' => 'Cerita penghuni yang sudah menempati hunian kami.',

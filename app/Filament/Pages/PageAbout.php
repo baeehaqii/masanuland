@@ -68,6 +68,7 @@ class PageAbout extends SettingsPage
                         TextInput::make('page_about.visi_title')->label('Judul Bagian')->placeholder('Visi & Misi'),
                         TextInput::make('page_about.misi_title')->label('Judul Misi')->placeholder('Misi Perusahaan'),
                         Textarea::make('page_about.visi')->label('Visi')->rows(3)->columnSpanFull(),
+                        TextInput::make('page_about.visi_label')->label('Label di Bawah Visi')->placeholder('Visi Perusahaan'),
                         Repeater::make('page_about.misi')
                             ->label('Misi')
                             ->schema([

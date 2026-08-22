@@ -155,7 +155,7 @@ export default function About() {
                                     {page.visi}
                                 </p>
                                 <footer className="mt-5 text-xs font-bold tracking-widest text-maroon-200 uppercase">
-                                    Visi Perusahaan
+                                    {page.visi_label ?? 'Visi Perusahaan'}
                                 </footer>
                             </blockquote>
                         )}

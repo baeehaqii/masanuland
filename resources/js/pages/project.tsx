@@ -15,18 +15,18 @@ import SiteLayout from '@/components/site-layout';
 import { embedUrl, img, mapSrc, rupiah, waLink } from '@/lib/site';
 import type { Project, SharedProps } from '@/types/site';
 
-const tabs = [
-    { id: 'siteplan', label: 'Siteplan' },
-    { id: 'denah', label: 'Denah & Tipe' },
-] as const;
+type TabId = 'siteplan' | 'denah';
 
 export default function ProjectPage({ project }: { project: Project }) {
     const { site } = usePage<SharedProps>().props;
+    const page = site.page_project ?? {};
+    const tabs: { id: TabId; label: string }[] = [
+        { id: 'siteplan', label: page.siteplan_tab ?? 'Siteplan' },
+        { id: 'denah', label: page.types_tab ?? 'Denah & Tipe' },
+    ];
     const hero = img(project.hero_image ?? project.card_image);
     const sitePlan = img(project.site_plan_image);
-    const [tab, setTab] = useState<(typeof tabs)[number]['id']>(
-        sitePlan ? 'siteplan' : 'denah',
-    );
+    const [tab, setTab] = useState<TabId>(sitePlan ? 'siteplan' : 'denah');
     const gallery = (project.gallery ?? [])
         .map(img)
         .filter(Boolean) as string[];
@@ -86,7 +86,7 @@ export default function ProjectPage({ project }: { project: Project }) {
 
                         <div className="mt-8 inline-block rounded-2xl bg-maroon-900/70 px-6 py-4 ring-1 ring-white/20 backdrop-blur-md">
                             <p className="text-xs font-semibold tracking-widest text-maroon-100 uppercase">
-                                Harga Mulai
+                                {page.price_label ?? 'Harga Mulai'}
                             </p>
                             {project.price_before && (
                                 <p className="text-sm text-gold line-through">
@@ -94,7 +94,9 @@ export default function ProjectPage({ project }: { project: Project }) {
                                 </p>
                             )}
                             <p className="text-2xl font-extrabold text-white sm:text-3xl">
-                                {rupiah(project.price_from) ?? 'Hubungi CS'}
+                                {rupiah(project.price_from) ??
+                                    page.price_empty ??
+                                    'Hubungi CS'}
                             </p>
                             {project.price_note && (
                                 <p className="mt-1 text-xs font-medium text-gold">
@@ -111,8 +113,8 @@ export default function ProjectPage({ project }: { project: Project }) {
                                     rel="noreferrer"
                                     className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-gold px-6 font-bold text-maroon-900 transition hover:bg-gold-dark active:scale-[0.98]"
                                 >
-                                    <Download className="size-5" /> Download
-                                    Brosur
+                                    <Download className="size-5" />{' '}
+                                    {page.brochure_label ?? 'Download Brosur'}
                                 </a>
                             )}
                             <a
@@ -121,8 +123,8 @@ export default function ProjectPage({ project }: { project: Project }) {
                                 rel="noreferrer"
                                 className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-wa px-6 font-bold text-white transition hover:bg-wa-dark active:scale-[0.98]"
                             >
-                                <MessageCircle className="size-5" /> Hubungi
-                                Kami
+                                <MessageCircle className="size-5" />{' '}
+                                {page.contact_label ?? 'Hubungi Kami'}
                             </a>
                         </div>
                     </div>
@@ -141,7 +143,8 @@ export default function ProjectPage({ project }: { project: Project }) {
                                 <Clock className="size-6 shrink-0 text-maroon" />
                                 <div>
                                     <p className="font-extrabold text-maroon">
-                                        {distance.minutes} Menit
+                                        {distance.minutes}{' '}
+                                        {page.minutes_suffix ?? 'Menit'}
                                     </p>
                                     <p className="text-xs text-maroon-900/70">
                                         ke {distance.place}
@@ -169,7 +172,11 @@ export default function ProjectPage({ project }: { project: Project }) {
             {(project.features ?? []).length > 0 && (
                 <section className="py-14 sm:py-16 lg:py-24">
                     <div className="mx-auto max-w-7xl px-4 lg:px-8">
-                        <SectionHeading title="Fasilitas & Keunggulan" />
+                        <SectionHeading
+                            title={
+                                page.features_title ?? 'Fasilitas & Keunggulan'
+                            }
+                        />
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {project.features!.map((feature) => (
                                 <div
@@ -195,7 +202,9 @@ export default function ProjectPage({ project }: { project: Project }) {
             {(sitePlan || (project.house_types ?? []).length > 0) && (
                 <section className="bg-maroon-50/60 py-14 sm:py-16 lg:py-24">
                     <div className="mx-auto max-w-7xl px-4 lg:px-8">
-                        <SectionHeading title="Siteplan & Denah" />
+                        <SectionHeading
+                            title={page.siteplan_title ?? 'Siteplan & Denah'}
+                        />
 
                         <div
                             role="tablist"
@@ -351,7 +360,9 @@ export default function ProjectPage({ project }: { project: Project }) {
             {updateVideo && (
                 <section className="py-14 sm:py-16 lg:py-24">
                     <div className="mx-auto max-w-7xl px-4 lg:px-8">
-                        <SectionHeading title="Update Terkini" />
+                        <SectionHeading
+                            title={page.update_title ?? 'Update Terkini'}
+                        />
                         <div className="mx-auto aspect-video max-w-4xl overflow-hidden rounded-2xl bg-maroon-900 shadow-xl">
                             <iframe
                                 src={updateVideo}
@@ -369,7 +380,9 @@ export default function ProjectPage({ project }: { project: Project }) {
             {(locationVideo || map || project.map_url) && (
                 <section className="bg-maroon-50/60 py-14 sm:py-16 lg:py-24">
                     <div className="mx-auto max-w-7xl px-4 lg:px-8">
-                        <SectionHeading title="Lokasi" />
+                        <SectionHeading
+                            title={page.location_title ?? 'Lokasi'}
+                        />
                         {locationVideo ? (
                             <div className="mx-auto aspect-video max-w-4xl overflow-hidden rounded-2xl bg-maroon-900 shadow-xl">
                                 <iframe
@@ -400,8 +413,8 @@ export default function ProjectPage({ project }: { project: Project }) {
                                     rel="noreferrer"
                                     className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-maroon px-6 font-bold text-white shadow-lg transition hover:bg-maroon-700 active:scale-[0.98]"
                                 >
-                                    <MapPin className="size-5" /> Buka di Google
-                                    Maps
+                                    <MapPin className="size-5" />{' '}
+                                    {page.maps_label ?? 'Buka di Google Maps'}
                                 </a>
                             </div>
                         )}

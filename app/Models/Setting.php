@@ -22,6 +22,7 @@ class Setting extends Model
         'og' => 'array',
         'page_home' => 'array',
         'page_about' => 'array',
+        'page_project' => 'array',
         'page_testimonials' => 'array',
     ];
 

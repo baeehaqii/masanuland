@@ -48,6 +48,7 @@ export interface PageHome {
     about_link_label?: string | null;
     projects_title?: string | null;
     projects_subtitle?: string | null;
+    projects_empty?: string | null;
     why_title?: string | null;
     why_subtitle?: string | null;
     reasons?: Reason[] | null;
@@ -65,6 +66,7 @@ export interface PageAbout {
     name_parts?: NamePart[] | null;
     name_conclusion?: string | null;
     visi_title?: string | null;
+    visi_label?: string | null;
     visi?: string | null;
     misi_title?: string | null;
     misi?: Misi[] | null;
@@ -72,6 +74,21 @@ export interface PageAbout {
     budaya_subtitle?: string | null;
     budaya?: Budaya[] | null;
     stats_title?: string | null;
+}
+
+export interface PageProject {
+    price_label?: string | null;
+    price_empty?: string | null;
+    contact_label?: string | null;
+    brochure_label?: string | null;
+    minutes_suffix?: string | null;
+    features_title?: string | null;
+    siteplan_title?: string | null;
+    siteplan_tab?: string | null;
+    types_tab?: string | null;
+    update_title?: string | null;
+    location_title?: string | null;
+    maps_label?: string | null;
 }
 
 export interface PageTestimonials {
@@ -90,6 +107,7 @@ export interface Site {
     buttons: Buttons | null;
     page_home: PageHome | null;
     page_about: PageAbout | null;
+    page_project: PageProject | null;
     page_testimonials: PageTestimonials | null;
     hero_image: string | null;
     hero_slides: string[] | null;

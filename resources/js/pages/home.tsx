@@ -151,7 +151,8 @@ export default function Home({ projects }: { projects: Project[] }) {
                     />
                     {projects.length === 0 ? (
                         <p className="text-center text-maroon-900/60">
-                            Perumahan akan segera ditampilkan.
+                            {page.projects_empty ??
+                                'Perumahan akan segera ditampilkan.'}
                         </p>
                     ) : (
                         <div className="grid gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
