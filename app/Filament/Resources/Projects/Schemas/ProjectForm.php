@@ -65,7 +65,8 @@ class ProjectForm
 
                 Tabs\Tab::make('Lokasi & Brosur')->schema([
                     TextInput::make('location_video')->label('Video Lokasi (YouTube)')->url(),
-                    Textarea::make('map_embed')->label('Embed Google Maps (iframe src)')->rows(3),
+                    Textarea::make('map_embed')->label('Embed Google Maps')->rows(3)
+                        ->helperText('Tempel kode <iframe> dari Google Maps, atau URL embed-nya saja.'),
                     TextInput::make('map_url')->label('Link Google Maps')->url(),
                     TextInput::make('brochure_url')->label('Link Brosur')->url(),
                 ]),

@@ -40,7 +40,8 @@ class MasterContact extends SettingsPage
                     TextInput::make('email')->label('Email')->email(),
                     TextInput::make('whatsapp_text')->label('Pesan WhatsApp Default'),
                     Textarea::make('address')->label('Alamat')->rows(2)->columnSpanFull(),
-                    Textarea::make('map_embed')->label('Embed Google Maps (iframe src)')->rows(3)->columnSpanFull(),
+                    Textarea::make('map_embed')->label('Embed Google Maps')->rows(3)->columnSpanFull()
+                        ->helperText('Tempel kode <iframe> dari Google Maps (Bagikan → Sematkan peta), atau URL embed-nya saja.'),
                 ])->columns(2)->columnSpanFull(),
 
                 Section::make('Sosial Media')->schema([

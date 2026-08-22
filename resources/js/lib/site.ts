@@ -37,3 +37,16 @@ export function embedUrl(url?: string | null): string | undefined {
 
     return id ? `https://www.youtube.com/embed/${id}` : url;
 }
+
+/**
+ * Google Maps memberi kode `<iframe ...>` lengkap saat menekan "Bagikan → Sematkan",
+ * dan itu yang biasanya ditempel ke CMS. Ambil src-nya; kalau yang ditempel memang
+ * sudah berupa URL, dipakai apa adanya.
+ */
+export function mapSrc(value?: string | null): string | undefined {
+    if (!value) {
+        return undefined;
+    }
+
+    return value.match(/src=["']([^"']+)["']/)?.[1] ?? value;
+}

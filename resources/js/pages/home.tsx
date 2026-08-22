@@ -18,7 +18,7 @@ import type { Slide } from '@/components/hero-slider';
 import ProjectCard from '@/components/project-card';
 import SectionHeading from '@/components/section-heading';
 import SiteLayout from '@/components/site-layout';
-import { img } from '@/lib/site';
+import { img, mapSrc } from '@/lib/site';
 import type { Project, SharedProps } from '@/types/site';
 
 const statIcons = [House, Navigation, Landmark, CalendarDays];
@@ -37,6 +37,7 @@ export default function Home({ projects }: { projects: Project[] }) {
     const { site } = usePage<SharedProps>().props;
     const page = site.page_home ?? {};
     const aboutImage = img(page.about_image);
+    const map = mapSrc(site.map_embed);
 
     // Slides come from /admin → Halaman → Beranda; a lone hero image stands in.
     const slides: Slide[] = (
@@ -204,7 +205,7 @@ export default function Home({ projects }: { projects: Project[] }) {
             )}
 
             {/* Map */}
-            {page.show_map !== false && site.map_embed && (
+            {page.show_map !== false && map && (
                 <section className="py-14 sm:py-16 lg:py-24">
                     <div className="mx-auto max-w-7xl px-4 lg:px-8">
                         <SectionHeading
@@ -212,7 +213,7 @@ export default function Home({ projects }: { projects: Project[] }) {
                         />
                         <div className="aspect-4/3 overflow-hidden rounded-2xl border border-maroon-100 shadow-lg sm:aspect-16/9">
                             <iframe
-                                src={site.map_embed}
+                                src={map}
                                 title="Peta lokasi"
                                 loading="lazy"
                                 className="size-full"

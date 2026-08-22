@@ -12,7 +12,7 @@ import { useState } from 'react';
 
 import SectionHeading from '@/components/section-heading';
 import SiteLayout from '@/components/site-layout';
-import { embedUrl, img, rupiah, waLink } from '@/lib/site';
+import { embedUrl, img, mapSrc, rupiah, waLink } from '@/lib/site';
 import type { Project, SharedProps } from '@/types/site';
 
 const tabs = [
@@ -32,6 +32,7 @@ export default function ProjectPage({ project }: { project: Project }) {
         .filter(Boolean) as string[];
     const updateVideo = embedUrl(project.update_video);
     const locationVideo = embedUrl(project.location_video);
+    const map = mapSrc(project.map_embed);
     const wa = (extra?: string) =>
         waLink(
             site,
@@ -365,7 +366,7 @@ export default function ProjectPage({ project }: { project: Project }) {
             )}
 
             {/* Lokasi */}
-            {(locationVideo || project.map_embed || project.map_url) && (
+            {(locationVideo || map || project.map_url) && (
                 <section className="bg-maroon-50/60 py-14 sm:py-16 lg:py-24">
                     <div className="mx-auto max-w-7xl px-4 lg:px-8">
                         <SectionHeading title="Lokasi" />
@@ -380,10 +381,10 @@ export default function ProjectPage({ project }: { project: Project }) {
                                 />
                             </div>
                         ) : (
-                            project.map_embed && (
+                            map && (
                                 <div className="mx-auto aspect-4/3 max-w-4xl overflow-hidden rounded-2xl border border-maroon-100 shadow-lg sm:aspect-video">
                                     <iframe
-                                        src={project.map_embed}
+                                        src={map}
                                         title={`Peta ${project.name}`}
                                         loading="lazy"
                                         className="size-full"
