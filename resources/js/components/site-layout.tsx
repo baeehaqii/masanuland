@@ -30,17 +30,23 @@ function Logo({ dark = false }: { dark?: boolean }) {
     const { site } = useSite();
     const logo = img(dark ? (site.logo_footer ?? site.logo) : site.logo);
 
-    if (logo) {
-        return <img src={logo} alt={site.brand_name} className="h-10 w-auto" />;
-    }
-
     return (
-        <span className="flex items-center gap-2">
-            <span className="grid size-9 place-items-center rounded-lg bg-maroon font-extrabold text-white">
-                {site.brand_name.charAt(0)}
-            </span>
+        <span className="flex items-center gap-3">
+            {logo ? (
+                <img
+                    src={logo}
+                    alt={site.brand_name}
+                    className={dark ? 'h-16 w-auto' : 'h-12 w-auto sm:h-14'}
+                />
+            ) : (
+                <span
+                    className={`grid place-items-center rounded-xl bg-maroon text-xl font-extrabold text-white ${dark ? 'size-16' : 'size-12 sm:size-14'}`}
+                >
+                    {site.brand_name.charAt(0)}
+                </span>
+            )}
             <span
-                className={`text-xl leading-none font-extrabold tracking-tight ${dark ? 'text-white' : 'text-maroon'}`}
+                className={`text-xl leading-none font-extrabold tracking-tight sm:text-2xl ${dark ? 'text-white' : 'text-maroon'}`}
             >
                 {site.brand_name}
             </span>
@@ -94,7 +100,7 @@ function Header() {
             }}
             className="sticky top-0 z-40 border-b border-maroon-100 bg-white/95 backdrop-blur"
         >
-            <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 lg:px-8">
+            <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-4 px-4 lg:px-8">
                 <Link
                     href="/"
                     aria-label={site.brand_name}
@@ -230,7 +236,7 @@ function Header() {
             {open && (
                 <nav
                     aria-label="Menu utama"
-                    className="max-h-[calc(100svh-4rem)] overflow-y-auto border-t border-maroon-100 bg-white px-4 pt-2 pb-4 lg:hidden"
+                    className="max-h-[calc(100svh-5rem)] overflow-y-auto border-t border-maroon-100 bg-white px-4 pt-2 pb-4 lg:hidden"
                 >
                     {items.map((item, index) => {
                         const key = `${item.label}-${index}`;

@@ -21,7 +21,9 @@ class ProjectsTable
                 ImageColumn::make('card_image')->label('')->imageHeight(40),
                 TextColumn::make('name')->label('Nama')->searchable()->sortable(),
                 TextColumn::make('tagline')->label('Tagline')->limit(40),
-                TextColumn::make('price_from')->label('Harga Mulai')->money('IDR')->sortable(),
+                // money('IDR') memakai locale aplikasi dan mencetak "IDR 450,000,000.00".
+                TextColumn::make('price_from')->label('Harga Mulai')->sortable()
+                    ->formatStateUsing(fn (?int $state): ?string => $state ? 'Rp '.number_format($state, 0, ',', '.') : null),
                 TextColumn::make('house_types_count')->counts('houseTypes')->label('Tipe'),
                 ToggleColumn::make('is_published')->label('Tayang'),
             ])

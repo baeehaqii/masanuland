@@ -12,6 +12,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
+use Filament\Support\RawJs;
 use Illuminate\Support\Str;
 
 class ProjectForm
@@ -29,8 +30,8 @@ class ProjectForm
                     TextInput::make('slug')->required()->unique(ignoreRecord: true),
                     TextInput::make('tagline')->label('Tagline')->placeholder('5 Menit ke Kota Purwokerto'),
                     TextInput::make('location')->label('Lokasi')->placeholder('Sokaraja, Banyumas'),
-                    TextInput::make('price_from')->label('Harga Mulai (Rp)')->numeric(),
-                    TextInput::make('price_before')->label('Harga Sebelum Diskon (Rp)')->numeric(),
+                    static::rupiah('price_from', 'Harga Mulai'),
+                    static::rupiah('price_before', 'Harga Sebelum Diskon'),
                     TextInput::make('price_note')->label('Catatan Harga')->placeholder('*Hemat 25jt khusus 10 pembeli pertama'),
                     TagsInput::make('badges')->label('Badge Unggulan')->placeholder('120 Unit')->columnSpanFull(),
                     TextInput::make('sort')->label('Urutan')->numeric()->default(0),
@@ -72,5 +73,16 @@ class ProjectForm
 
             Section::make()->schema([])->hidden(),
         ]);
+    }
+
+    /** Input harga: dipisah titik saat diketik, disimpan sebagai angka bulat. */
+    protected static function rupiah(string $name, string $label): TextInput
+    {
+        return TextInput::make($name)
+            ->label($label)
+            ->prefix('Rp')
+            ->numeric()
+            ->mask(RawJs::make("\$money(\$input, ',', '.', 0)"))
+            ->stripCharacters('.');
     }
 }
