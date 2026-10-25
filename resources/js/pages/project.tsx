@@ -1,4 +1,4 @@
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     Building2,
     Check,
@@ -62,6 +62,7 @@ export default function ProjectPage({ project }: { project: Project }) {
     // Kira-kira 3 baris; deskripsi pendek tidak perlu tombol "Selengkapnya".
     const longDescription = description.replace(/<[^>]+>/g, '').length > 320;
     const [expanded, setExpanded] = useState(false);
+    const [sent, setSent] = useState(false);
     const wa = (extra?: string) =>
         waLink(
             site,
@@ -69,15 +70,32 @@ export default function ProjectPage({ project }: { project: Project }) {
         );
     const sendInquiry = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        const form = new FormData(event.currentTarget);
+        const element = event.currentTarget;
+        const form = new FormData(element);
+        const name = String(form.get('name') ?? '').trim();
         const phone = String(form.get('phone') ?? '').trim();
+        const message = String(form.get('message') ?? '').trim();
+        // WhatsApp dibuka dulu, masih di dalam klik, supaya tidak diblokir popup blocker.
         window.open(
             waLink(
                 site,
-                `Halo ${site.brand_name}, saya ${String(form.get('name')).trim()}${phone ? ` (${phone})` : ''}.\n${String(form.get('message')).trim()}\n\nPerumahan: ${project.name}. Saya dapat informasi dari WEBSITE.`,
+                `Halo ${site.brand_name}, saya ${name}${phone ? ` (${phone})` : ''}.\n${message}\n\nPerumahan: ${project.name}. Saya dapat informasi dari WEBSITE.`,
             ),
             '_blank',
             'noreferrer',
+        );
+        // Lalu dicatat sebagai lead di CMS (menu Proyek → Leads).
+        router.post(
+            `/perumahan/${project.slug}/leads`,
+            { name, phone, message, website: form.get('website') },
+            {
+                preserveScroll: true,
+                preserveState: true,
+                onSuccess: () => {
+                    element.reset();
+                    setSent(true);
+                },
+            },
         );
     };
 
@@ -328,6 +346,14 @@ export default function ProjectPage({ project }: { project: Project }) {
                             <h2 className="text-xl font-extrabold text-maroon-900">
                                 {page.inquiry_title ?? 'Minta Informasi'}
                             </h2>
+                            {/* Honeypot: tersembunyi dari pengunjung, hanya diisi bot. */}
+                            <input
+                                name="website"
+                                tabIndex={-1}
+                                autoComplete="off"
+                                aria-hidden="true"
+                                className="hidden"
+                            />
                             <div className="mt-4 grid gap-3">
                                 <label className="grid gap-1.5 text-sm font-semibold text-maroon-900">
                                     Nama Lengkap*
@@ -360,6 +386,15 @@ export default function ProjectPage({ project }: { project: Project }) {
                                     />
                                 </label>
                             </div>
+                            {sent && (
+                                <p
+                                    role="status"
+                                    className="mt-3 rounded-xl bg-green-50 px-4 py-3 text-sm font-semibold text-green-800"
+                                >
+                                    Terima kasih! Tim kami akan segera
+                                    menghubungi Anda.
+                                </p>
+                            )}
                             <p className="mt-3 text-xs leading-relaxed text-maroon-900/60">
                                 Pesan dikirim lewat WhatsApp ke tim marketing{' '}
                                 {site.brand_name}.

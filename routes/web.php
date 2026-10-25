@@ -3,6 +3,7 @@
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\Testimonial;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -20,6 +21,22 @@ Route::get('/testimoni', fn () => Inertia::render('testimonials', [
 Route::get('/perumahan/{project:slug}', fn (Project $project) => Inertia::render('project', [
     'project' => $project->load('houseTypes'),
 ]))->name('project');
+
+// Form "Minta Informasi" di detail perumahan → menu Leads di CMS.
+Route::post('/perumahan/{project:slug}/leads', function (Request $request, Project $project) {
+    // Honeypot: kolom tersembunyi ini hanya diisi bot.
+    if ($request->filled('website')) {
+        return back();
+    }
+
+    $project->leads()->create($request->validate([
+        'name' => ['required', 'string', 'max:100'],
+        'phone' => ['nullable', 'string', 'max:30'],
+        'message' => ['nullable', 'string', 'max:2000'],
+    ]));
+
+    return back();
+})->middleware('throttle:5,1')->name('project.leads');
 
 /**
  * Sitemap untuk Google Search Console. Dibangun dari data CMS, jadi perumahan

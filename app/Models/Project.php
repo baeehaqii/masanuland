@@ -25,6 +25,12 @@ class Project extends Model
         return $this->hasMany(HouseType::class)->orderBy('sort');
     }
 
+    /** @return HasMany<Lead, $this> */
+    public function leads(): HasMany
+    {
+        return $this->hasMany(Lead::class);
+    }
+
     /** @return HasMany<Testimonial, $this> */
     public function testimonials(): HasMany
     {

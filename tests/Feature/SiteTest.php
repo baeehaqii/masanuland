@@ -6,6 +6,7 @@ use App\Filament\Pages\MasterIdentity;
 use App\Filament\Pages\PageHome;
 use App\Filament\Pages\SeoSettings;
 use App\Filament\Resources\Projects\Pages\EditProject;
+use App\Models\Lead;
 use App\Models\PageView;
 use App\Models\Project;
 use App\Models\Setting;
@@ -327,5 +328,21 @@ class SiteTest extends TestCase
             ->assertOk()
             ->assertSee('Denah Lantai 1')
             ->assertSee('bed.svg', false);
+    }
+
+    public function test_inquiry_form_is_saved_as_a_lead_for_its_project(): void
+    {
+        $project = Project::published()->first();
+
+        $this->post("/perumahan/{$project->slug}/leads", ['name' => 'Budi', 'phone' => '0812-3456-7890', 'message' => 'Minta info unit'])
+            ->assertRedirect();
+        $this->post("/perumahan/{$project->slug}/leads", ['name' => 'Bot', 'website' => 'http://spam.test']);
+        $this->post("/perumahan/{$project->slug}/leads", ['name' => ''])->assertSessionHasErrors('name');
+
+        $this->assertSame(['Budi'], Lead::pluck('name')->all());
+        $this->assertSame($project->id, Lead::first()->project_id);
+
+        $this->actingAs($this->superAdmin())->get('/admin/leads')
+            ->assertOk()->assertSee('Budi')->assertSee($project->name);
     }
 }
