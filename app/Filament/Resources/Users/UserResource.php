@@ -36,15 +36,15 @@ class UserResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return $schema->components([
-            TextInput::make('name')->label('Nama')->required(),
-            TextInput::make('email')->label('Email')->email()->required()->unique(ignoreRecord: true),
+            TextInput::make('name')->label('Nama')->placeholder('Nama lengkap')->required(),
+            TextInput::make('email')->label('Email')->placeholder('nama@masanuland.id')->email()->required()->unique(ignoreRecord: true),
             // Blank on edit means "keep the current password".
-            TextInput::make('password')->label('Password')->password()->revealable()
+            TextInput::make('password')->label('Password')->placeholder('Minimal 8 karakter')->password()->revealable()
                 ->required(fn (string $operation) => $operation === 'create')
                 ->dehydrated(fn (?string $state) => filled($state))
                 ->dehydrateStateUsing(fn (string $state) => Hash::make($state))
                 ->minLength(8),
-            Select::make('roles')->label('Peran')->relationship('roles', 'name')
+            Select::make('roles')->label('Peran')->placeholder('Pilih peran')->relationship('roles', 'name')
                 ->multiple()->preload()->required()
                 ->helperText('Pengguna tanpa peran tidak bisa masuk ke panel.'),
         ])->columns(2);

@@ -23,7 +23,7 @@ import type { Project, SharedProps } from '@/types/site';
 
 const statIcons = [House, Navigation, Landmark, CalendarDays];
 
-/** Icon keys offered by /admin → Halaman → Beranda. */
+/** Ikon bawaan untuk kartu yang belum diberi SVG (data lama & konten default). */
 const reasonIcons = {
     shield: ShieldCheck,
     badge: BadgeCheck,
@@ -177,6 +177,10 @@ export default function Home({ projects }: { projects: Project[] }) {
                         />
                         <div className="grid gap-5 sm:grid-cols-3 sm:gap-6">
                             {(page.reasons ?? []).map((item) => {
+                                // Ikon lama berupa nama ("shield"); ikon baru path SVG yang diunggah.
+                                const svg = item.icon?.includes('/')
+                                    ? img(item.icon)
+                                    : undefined;
                                 const Icon =
                                     reasonIcons[
                                         (item.icon ??
@@ -189,7 +193,16 @@ export default function Home({ projects }: { projects: Project[] }) {
                                         className="rounded-2xl border border-maroon-100 bg-white p-6 shadow-sm transition hover:border-maroon-200 hover:shadow-md"
                                     >
                                         <span className="grid size-12 place-items-center rounded-xl bg-maroon-50 text-maroon">
-                                            <Icon className="size-6" />
+                                            {svg ? (
+                                                <img
+                                                    src={svg}
+                                                    alt=""
+                                                    loading="lazy"
+                                                    className="size-7 object-contain"
+                                                />
+                                            ) : (
+                                                <Icon className="size-6" />
+                                            )}
                                         </span>
                                         <h3 className="mt-4 text-lg font-extrabold text-maroon-900">
                                             {item.title}

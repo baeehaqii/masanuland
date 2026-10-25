@@ -48,13 +48,13 @@ class MasterButtons extends SettingsPage
                         TextInput::make('buttons.whatsapp_mobile_label')->label('Tombol WhatsApp Navbar (Mobile)')->placeholder('Hubungi via WhatsApp'),
                         TextInput::make('buttons.brochure_label')->label('Tombol Brosur')->placeholder('Brosur & Harga'),
                         TextInput::make('buttons.detail_label')->label('Tombol Detail Perumahan')->placeholder('Lihat Detail'),
-                        TextInput::make('brochure_url')->label('Link Brosur & Harga')->url()
+                        TextInput::make('brochure_url')->label('Link Brosur & Harga')->placeholder('https://drive.google.com/file/d/xxxxxxxx')->url()
                             ->helperText('Kosongkan untuk mengarahkan ke WhatsApp.')->columnSpanFull(),
                     ])->columns(2)->columnSpanFull(),
 
                 Section::make('CTA Bawah Halaman')->schema([
                     TextInput::make('buttons.cta_title')->label('Judul CTA')->placeholder('Info Lebih Lanjut, Klik'),
-                    TextInput::make('buttons.cta_label')->label('Teks Tombol CTA')
+                    TextInput::make('buttons.cta_label')->label('Teks Tombol CTA')->placeholder('0858-1050-4000')
                         ->helperText('Kosongkan untuk memakai nomor telepon.'),
                 ])->columns(2)->columnSpanFull(),
 
@@ -62,7 +62,7 @@ class MasterButtons extends SettingsPage
                     TextInput::make('buttons.footer_menu_title')->label('Judul Kolom Menu')->placeholder('Menu'),
                     TextInput::make('buttons.footer_contact_title')->label('Judul Kolom Kontak')->placeholder('Kontak Kami'),
                     TextInput::make('buttons.footer_social_title')->label('Judul Kolom Sosial')->placeholder('Ikuti Kami'),
-                    TextInput::make('buttons.copyright')->label('Teks Copyright')
+                    TextInput::make('buttons.copyright')->label('Teks Copyright')->placeholder('Copyright © 2026 Masanuland')
                         ->helperText('Kosongkan untuk memakai "Copyright © tahun Nama Brand".')->columnSpanFull(),
                 ])->columns(3)->columnSpanFull(),
             ]);

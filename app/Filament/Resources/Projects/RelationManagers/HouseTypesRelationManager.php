@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\Projects\RelationManagers;
 
-use App\Support\CompressedImage;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -28,17 +27,17 @@ class HouseTypesRelationManager extends RelationManager
     {
         return $schema->components([
             TextInput::make('name')->label('Nama Tipe')->required()->placeholder('T-45/72'),
-            TextInput::make('price')->label('Harga')
+            TextInput::make('price')->label('Harga')->placeholder('450.000.000')
                 ->prefix('Rp')->numeric()
                 ->mask(RawJs::make("\$money(\$input, ',', '.', 0)"))
                 ->stripCharacters('.'),
-            FileUpload::make('image')->label('Gambar')->image()->directory('house-types')->saveUploadedFileUsing(CompressedImage::store(...)),
-            TextInput::make('brochure_url')->label('Link Brosur')->url(),
-            TextInput::make('sort')->label('Urutan')->numeric()->default(0),
+            FileUpload::make('image')->label('Gambar')->image()->directory('house-types'),
+            TextInput::make('brochure_url')->label('Link Brosur')->placeholder('https://drive.google.com/file/d/xxxxxxxx')->url(),
+            TextInput::make('sort')->label('Urutan')->placeholder('1')->numeric()->default(0),
             Repeater::make('specs')
                 ->label('Spesifikasi')
                 ->schema([
-                    TextInput::make('count')->label('Jumlah')->required()->default(1),
+                    TextInput::make('count')->label('Jumlah')->placeholder('2')->required()->default(1),
                     TextInput::make('label')->label('Ruang')->required()->placeholder('Kamar Tidur'),
                 ])
                 ->columns(2)

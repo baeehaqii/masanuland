@@ -2,8 +2,11 @@
 
 namespace App\Support;
 
+use Closure;
 use Filament\Forms\Components\BaseFileUpload;
+use Filament\Forms\Components\RichEditor;
 use GdImage;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
@@ -11,7 +14,8 @@ use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
  * Admin uploads are stored re-encoded as AVIF (WebP when the server's GD has
  * no AVIF), scaled down to MAX_WIDTH, so a 3 MB JPEG becomes ~100-200 KB.
  *
- * Use: FileUpload::make(...)->saveUploadedFileUsing(CompressedImage::store(...))
+ * Every FileUpload goes through store() by default (AppServiceProvider).
+ * Fields read by crawlers/browsers that don't take AVIF override it with as().
  */
 class CompressedImage
 {
@@ -21,27 +25,77 @@ class CompressedImage
 
     public static function store(BaseFileUpload $component, TemporaryUploadedFile $file): ?string
     {
-        $image = self::decode($file);
+        return self::save($component->getDisk(), $component->getDirectory(), $component->getVisibility(), $file, self::defaultFormat(), self::MAX_WIDTH)
+            // SVG, GIF, HEIC, broken files… keep Filament's default behaviour.
+            ?? $component->saveUploadedFile($file);
+    }
 
-        // SVG, GIF, HEIC, broken files… keep Filament's default behaviour.
-        if (! $image) {
-            return $component->saveUploadedFile($file);
+    /**
+     * E.g. as('jpg', 1200) for OG images — WhatsApp/Facebook previews don't read AVIF.
+     *
+     * @param  'avif'|'webp'|'jpg'|'png'  $format
+     */
+    public static function as(string $format, int $maxWidth): Closure
+    {
+        return fn (BaseFileUpload $component, TemporaryUploadedFile $file): ?string => self::save($component->getDisk(), $component->getDirectory(), $component->getVisibility(), $file, $format, $maxWidth)
+            ?? $component->saveUploadedFile($file);
+    }
+
+    /** Images dropped into a RichEditor (e.g. project description). */
+    public static function attachment(RichEditor $component, TemporaryUploadedFile $file): ?string
+    {
+        $disk = $component->getFileAttachmentsDisk();
+        $directory = (string) $component->getFileAttachmentsDirectory();
+        $visibility = $component->getFileAttachmentsVisibility();
+
+        if ($path = self::save($disk, $directory, $visibility, $file, self::defaultFormat(), self::MAX_WIDTH)) {
+            return $path;
         }
 
-        if (imagesx($image) > self::MAX_WIDTH) {
-            $image = imagescale($image, self::MAX_WIDTH) ?: $image;
+        // Non-image attachments (PDF…): same as Filament's default.
+        $path = $file->store($directory, $component->getFileAttachmentsDiskName()) ?: null;
+        rescue(fn () => $path && $disk->setVisibility($path, $visibility), report: false);
+
+        return $path;
+    }
+
+    /** @return 'avif'|'webp' */
+    private static function defaultFormat(): string
+    {
+        return function_exists('imageavif') ? 'avif' : 'webp';
+    }
+
+    /**
+     * Returns null when the file isn't a raster image GD can read.
+     *
+     * @param  'avif'|'webp'|'jpg'|'png'  $format
+     */
+    private static function save(Filesystem $disk, ?string $directory, string $visibility, TemporaryUploadedFile $file, string $format, int $maxWidth): ?string
+    {
+        $image = self::decode($file);
+
+        if (! $image) {
+            return null;
+        }
+
+        if (imagesx($image) > $maxWidth) {
+            $image = imagescale($image, $maxWidth) ?: $image;
         }
 
         imagealphablending($image, false);
         imagesavealpha($image, true);
 
-        $avif = function_exists('imageavif');
         ob_start();
-        $avif ? imageavif($image, null, self::QUALITY) : imagewebp($image, null, self::QUALITY);
+        match ($format) {
+            'avif' => imageavif($image, null, self::QUALITY),
+            'webp' => imagewebp($image, null, self::QUALITY),
+            'jpg' => imagejpeg($image, null, 82),
+            'png' => imagepng($image, null, 9),
+        };
         $bytes = (string) ob_get_clean();
 
-        $path = trim($component->getDirectory().'/'.Str::ulid().($avif ? '.avif' : '.webp'), '/');
-        $component->getDisk()->put($path, $bytes, $component->getVisibility());
+        $path = trim($directory.'/'.Str::ulid().'.'.$format, '/');
+        $disk->put($path, $bytes, $visibility);
 
         return $path;
     }

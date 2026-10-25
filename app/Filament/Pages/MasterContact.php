@@ -37,10 +37,10 @@ class MasterContact extends SettingsPage
                 Section::make('Kontak')->schema([
                     TextInput::make('phone')->label('Nomor Telepon')->placeholder('0812-3456-7890'),
                     TextInput::make('whatsapp')->label('Nomor WhatsApp')->placeholder('6281234567890'),
-                    TextInput::make('email')->label('Email')->email(),
-                    TextInput::make('whatsapp_text')->label('Pesan WhatsApp Default'),
-                    Textarea::make('address')->label('Alamat')->rows(2)->columnSpanFull(),
-                    Textarea::make('map_embed')->label('Embed Google Maps')->rows(3)->columnSpanFull()
+                    TextInput::make('email')->label('Email')->placeholder('info@masanuland.id')->email(),
+                    TextInput::make('whatsapp_text')->label('Pesan WhatsApp Default')->placeholder('Halo Masanuland, mohon informasi perumahannya.'),
+                    Textarea::make('address')->label('Alamat')->placeholder('Sokaraja, Kabupaten Banyumas, Jawa Tengah')->rows(2)->columnSpanFull(),
+                    Textarea::make('map_embed')->label('Embed Google Maps')->placeholder('<iframe src="https://www.google.com/maps/embed?pb=..."></iframe>')->rows(3)->columnSpanFull()
                         ->helperText('Tempel kode <iframe> dari Google Maps (Bagikan → Sematkan peta), atau URL embed-nya saja.'),
                 ])->columns(2)->columnSpanFull(),
 
@@ -49,7 +49,7 @@ class MasterContact extends SettingsPage
                         ->hiddenLabel()
                         ->schema([
                             TextInput::make('label')->label('Nama')->required()->placeholder('Instagram'),
-                            TextInput::make('url')->label('Link')->url()->required(),
+                            TextInput::make('url')->label('Link')->placeholder('https://instagram.com/masanuland.id')->url()->required(),
                         ])
                         ->columns(2)->defaultItems(0)->columnSpanFull(),
                 ])->columnSpanFull(),

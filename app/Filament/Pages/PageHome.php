@@ -2,11 +2,10 @@
 
 namespace App\Filament\Pages;
 
-use App\Support\CompressedImage;
+use App\Support\SvgIcon;
 use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -44,46 +43,40 @@ class PageHome extends SettingsPage
                         FileUpload::make('hero_slides')->label('Slider Header')
                             ->helperText('Banner di bawah menu. Rasio 1920x786 px. Semua teks promo menyatu di gambar. Geser gambar untuk mengatur urutan tampil (paling kiri = pertama). Otomatis dikompres ke AVIF saat disimpan.')
                             ->image()->multiple()->reorderable()->appendFiles()->panelLayout('grid')
-                            ->directory('site')->saveUploadedFileUsing(CompressedImage::store(...))->columnSpanFull(),
+                            ->directory('site')->columnSpanFull(),
                         FileUpload::make('hero_image')->label('Gambar Cadangan')
                             ->helperText('Dipakai kalau slider di atas kosong.')
-                            ->image()->directory('site')->saveUploadedFileUsing(CompressedImage::store(...)),
+                            ->image()->directory('site'),
                     ])->columns(2),
 
                     Tabs\Tab::make('Bagian Tentang')->schema([
                         TextInput::make('page_home.about_eyebrow')->label('Label Kecil')->placeholder('Tentang Kami'),
-                        TextInput::make('page_home.about_title')->label('Judul'),
+                        TextInput::make('page_home.about_title')->label('Judul')->placeholder('Pengembang Properti Purbalingga & Banyumas'),
                         Textarea::make('about_text')->label('Deskripsi')->rows(5)->columnSpanFull()
+                            ->placeholder('PT. Masanu Bangun Graha mengembangkan hunian dan area komersial di Purbalingga dan Banyumas...')
                             ->helperText('Dipakai bersama halaman Tentang Kami — mengubah di sini ikut mengubah di sana.'),
-                        TagsInput::make('about_points')->label('Poin Keunggulan')->columnSpanFull()
+                        TagsInput::make('about_points')->label('Poin Keunggulan')->placeholder('Legalitas dan Akad Transparan')->columnSpanFull()
                             ->helperText('Tekan Enter tiap selesai satu poin. Dipakai bersama halaman Tentang Kami.'),
                         TextInput::make('page_home.about_link_label')->label('Teks Tombol')->placeholder('Selengkapnya'),
-                        FileUpload::make('page_home.about_image')->label('Gambar / Foto Fasad')->image()->directory('site')->saveUploadedFileUsing(CompressedImage::store(...)),
+                        FileUpload::make('page_home.about_image')->label('Gambar / Foto Fasad')->image()->directory('site'),
                     ])->columns(2),
 
                     Tabs\Tab::make('Bagian Perumahan')->schema([
                         TextInput::make('page_home.projects_title')->label('Judul')->placeholder('Lokasi Unggulan'),
-                        TextInput::make('page_home.projects_subtitle')->label('Sub Judul'),
+                        TextInput::make('page_home.projects_subtitle')->label('Sub Judul')->placeholder('Pilih hunian yang paling dekat dengan aktivitas harian Anda.'),
                         TextInput::make('page_home.projects_empty')->label('Teks Saat Belum Ada Perumahan')
                             ->placeholder('Perumahan akan segera ditampilkan.')->columnSpanFull(),
                     ])->columns(2),
 
                     Tabs\Tab::make('Alasan Memilih Kami')->schema([
                         TextInput::make('page_home.why_title')->label('Judul')->placeholder('Developer Terpercaya'),
-                        TextInput::make('page_home.why_subtitle')->label('Sub Judul'),
+                        TextInput::make('page_home.why_subtitle')->label('Sub Judul')->placeholder('Tiga hal yang kami pegang di setiap unit yang kami serahkan.'),
                         Repeater::make('page_home.reasons')
                             ->label('Kartu Alasan')
                             ->schema([
-                                Select::make('icon')->label('Ikon')->options([
-                                    'shield' => 'Perisai (Legalitas)',
-                                    'badge' => 'Badge (Terverifikasi)',
-                                    'coins' => 'Koin (KPR)',
-                                    'home' => 'Rumah',
-                                    'map' => 'Lokasi',
-                                    'clock' => 'Jam',
-                                ])->default('shield'),
-                                TextInput::make('title')->label('Judul')->required(),
-                                TextInput::make('body')->label('Deskripsi')->columnSpanFull(),
+                                SvgIcon::upload(),
+                                TextInput::make('title')->label('Judul')->required()->placeholder('Legalitas Aman'),
+                                TextInput::make('body')->label('Deskripsi')->placeholder('Sertifikat dan perizinan jelas, proses balik nama dibantu sampai selesai.')->columnSpanFull(),
                             ])
                             ->columns(2)
                             ->defaultItems(0)

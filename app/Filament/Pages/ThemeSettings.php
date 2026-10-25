@@ -39,28 +39,28 @@ class ThemeSettings extends SettingsPage
                 Section::make('Warna Utama')
                     ->description('Warna dominan website. Kosongkan salah satu untuk memakai warna bawaan.')
                     ->schema([
-                        ColorPicker::make('theme.maroon')->label('Maroon (Utama)'),
-                        ColorPicker::make('theme.gold')->label('Emas (Aksen)'),
-                        ColorPicker::make('theme.gold_dark')->label('Emas Gelap (Hover)'),
-                        ColorPicker::make('theme.brick')->label('Latar Slider Banner'),
+                        ColorPicker::make('theme.maroon')->label('Maroon (Utama)')->placeholder('#7a0f1b'),
+                        ColorPicker::make('theme.gold')->label('Emas (Aksen)')->placeholder('#c9962c'),
+                        ColorPicker::make('theme.gold_dark')->label('Emas Gelap (Hover)')->placeholder('#a87b1c'),
+                        ColorPicker::make('theme.brick')->label('Latar Slider Banner')->placeholder('#932922'),
                     ])->columns(4)->columnSpanFull(),
 
                 Section::make('Gradasi Maroon')
                     ->description('Dipakai untuk latar, border, dan teks sekunder.')
                     ->schema([
-                        ColorPicker::make('theme.maroon_50')->label('Maroon 50'),
-                        ColorPicker::make('theme.maroon_100')->label('Maroon 100'),
-                        ColorPicker::make('theme.maroon_200')->label('Maroon 200'),
-                        ColorPicker::make('theme.maroon_400')->label('Maroon 400'),
-                        ColorPicker::make('theme.maroon_500')->label('Maroon 500'),
-                        ColorPicker::make('theme.maroon_700')->label('Maroon 700'),
-                        ColorPicker::make('theme.maroon_800')->label('Maroon 800'),
-                        ColorPicker::make('theme.maroon_900')->label('Maroon 900'),
+                        ColorPicker::make('theme.maroon_50')->label('Maroon 50')->placeholder('#fdf3f4'),
+                        ColorPicker::make('theme.maroon_100')->label('Maroon 100')->placeholder('#fbe4e6'),
+                        ColorPicker::make('theme.maroon_200')->label('Maroon 200')->placeholder('#f6ccd1'),
+                        ColorPicker::make('theme.maroon_400')->label('Maroon 400')->placeholder('#c9364b'),
+                        ColorPicker::make('theme.maroon_500')->label('Maroon 500')->placeholder('#a4162a'),
+                        ColorPicker::make('theme.maroon_700')->label('Maroon 700')->placeholder('#650c17'),
+                        ColorPicker::make('theme.maroon_800')->label('Maroon 800')->placeholder('#4f0810'),
+                        ColorPicker::make('theme.maroon_900')->label('Maroon 900')->placeholder('#37050b'),
                     ])->columns(4)->columnSpanFull(),
 
                 Section::make('Tombol WhatsApp')->schema([
-                    ColorPicker::make('theme.wa')->label('Hijau WhatsApp'),
-                    ColorPicker::make('theme.wa_dark')->label('Hijau Hover'),
+                    ColorPicker::make('theme.wa')->label('Hijau WhatsApp')->placeholder('#25d366'),
+                    ColorPicker::make('theme.wa_dark')->label('Hijau Hover')->placeholder('#1da851'),
                 ])->columns(2)->columnSpanFull(),
             ]);
     }

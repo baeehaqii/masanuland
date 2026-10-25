@@ -86,8 +86,10 @@ export interface PageProject {
     siteplan_title?: string | null;
     siteplan_tab?: string | null;
     types_tab?: string | null;
-    update_title?: string | null;
-    location_title?: string | null;
+    info_title?: string | null;
+    about_title?: string | null;
+    inquiry_title?: string | null;
+    inquiry_button?: string | null;
     progress_title?: string | null;
     maps_label?: string | null;
 }
@@ -153,9 +155,7 @@ export interface Project {
     distances: Distance[] | null;
     features: { label: string; icon: string | null }[] | null;
     gallery: string[] | null;
-    update_video: string | null;
     progress_videos: { url: string; label: string }[] | null;
-    location_video: string | null;
     card_image: string | null;
     hero_image: string | null;
     site_plan_image: string | null;

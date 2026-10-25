@@ -48,8 +48,8 @@ class ManageMenu extends SettingsPage
         return Repeater::make($name)
             ->hiddenLabel()
             ->schema([
-                TextInput::make('label')->label('Judul Menu')->required(),
-                Select::make('type')->label('Jenis')
+                TextInput::make('label')->label('Judul Menu')->placeholder('Tentang Kami')->required(),
+                Select::make('type')->label('Jenis')->placeholder('Pilih jenis menu')
                     ->options([
                         'link' => 'Link biasa',
                         'projects' => 'Daftar Perumahan (otomatis)',

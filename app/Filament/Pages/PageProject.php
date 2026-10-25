@@ -48,8 +48,10 @@ class PageProject extends SettingsPage
                     TextInput::make('page_project.siteplan_title')->label('Siteplan')->placeholder('Siteplan & Denah'),
                     TextInput::make('page_project.siteplan_tab')->label('Nama Tab Siteplan')->placeholder('Siteplan'),
                     TextInput::make('page_project.types_tab')->label('Nama Tab Denah')->placeholder('Denah & Tipe'),
-                    TextInput::make('page_project.update_title')->label('Update Terkini')->placeholder('Update Terkini'),
-                    TextInput::make('page_project.location_title')->label('Lokasi')->placeholder('Lokasi'),
+                    TextInput::make('page_project.info_title')->label('Info Umum')->placeholder('Info Umum'),
+                    TextInput::make('page_project.about_title')->label('Tentang Perumahan')->placeholder('Tentang Perumahan'),
+                    TextInput::make('page_project.inquiry_title')->label('Judul Form Informasi')->placeholder('Minta Informasi'),
+                    TextInput::make('page_project.inquiry_button')->label('Tombol Form Informasi')->placeholder('Kirim via WhatsApp'),
                     TextInput::make('page_project.progress_title')->label('Progres Pembangunan')->placeholder('Progres Pembangunan'),
                 ])->columns(2)->columnSpanFull(),
 

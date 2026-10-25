@@ -35,8 +35,8 @@ class PageTestimonials extends SettingsPage
             ->components([
                 Section::make('Header Halaman')->schema([
                     TextInput::make('page_testimonials.hero_title')->label('Judul')->placeholder('Testimoni'),
-                    Textarea::make('page_testimonials.hero_subtitle')->label('Sub Judul')->rows(2),
-                    TextInput::make('page_testimonials.empty_text')->label('Teks Saat Belum Ada Testimoni')->columnSpanFull(),
+                    Textarea::make('page_testimonials.hero_subtitle')->label('Sub Judul')->placeholder('Cerita mereka yang sudah tinggal di perumahan kami')->rows(2),
+                    TextInput::make('page_testimonials.empty_text')->label('Teks Saat Belum Ada Testimoni')->placeholder('Testimoni akan segera ditampilkan.')->columnSpanFull(),
                 ])->columns(2)->columnSpanFull(),
             ]);
     }

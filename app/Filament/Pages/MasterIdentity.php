@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Support\CompressedImage;
 use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Textarea;
@@ -35,8 +36,8 @@ class MasterIdentity extends SettingsPage
             ->statePath('data')
             ->components([
                 Section::make('Identitas')->schema([
-                    TextInput::make('brand_name')->label('Nama Brand')->required(),
-                    Textarea::make('tagline')->label('Tagline / Deskripsi Singkat')->rows(3)->columnSpanFull(),
+                    TextInput::make('brand_name')->label('Nama Brand')->placeholder('Masanuland')->required(),
+                    Textarea::make('tagline')->label('Tagline / Deskripsi Singkat')->placeholder('Pengembang properti dan real estate di Purbalingga dan Banyumas.')->rows(3)->columnSpanFull(),
                 ])->columns(2)->columnSpanFull(),
 
                 Section::make('Logo')->schema([
@@ -48,7 +49,9 @@ class MasterIdentity extends SettingsPage
                         ->image()->directory('site'),
                     FileUpload::make('favicon')->label('Favicon')
                         ->helperText('Ikon tab browser. PNG/ICO/SVG persegi, 512x512 px.')
-                        ->image()->directory('site'),
+                        ->image()->directory('site')
+                            // PNG, bukan AVIF: tidak semua browser menerima favicon AVIF.
+                        ->saveUploadedFileUsing(CompressedImage::as('png', 512)),
                 ])->columns(3)->columnSpanFull(),
             ]);
     }

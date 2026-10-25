@@ -2,13 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\MasterIdentity;
 use App\Filament\Pages\PageHome;
-use App\Filament\Resources\Projects\Schemas\ProjectForm;
+use App\Filament\Pages\SeoSettings;
+use App\Filament\Resources\Projects\Pages\EditProject;
 use App\Models\PageView;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\User;
 use App\Support\CompressedImage;
+use App\Support\SvgIcon;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\MasanulandSeeder;
 use Database\Seeders\SeoSeeder;
@@ -62,7 +65,10 @@ class SiteTest extends TestCase
         $this->get('/admin/projects/'.Project::first()->getKey().'/edit')
             ->assertOk()
             ->assertSee('Nama Perumahan')
-            ->assertSee('Masanu Village Sokaraja');
+            ->assertSee('Masanu Village Sokaraja')
+            ->assertSee('Video Progres')
+            ->assertDontSee('Video Lokasi (YouTube)')
+            ->assertDontSee('Video Update Terkini');
         $this->get('/admin/testimonials')->assertOk();
         $this->get('/admin/users')->assertOk();
         $this->get('/admin/shield/roles')->assertOk();
@@ -239,7 +245,7 @@ class SiteTest extends TestCase
     {
         $failed = [];
         $check = function (string $svg) use (&$failed) {
-            ProjectForm::safeSvg()('icon', UploadedFile::fake()->createWithContent('i.svg', $svg), function ($m) use (&$failed) {
+            SvgIcon::safe()('icon', UploadedFile::fake()->createWithContent('i.svg', $svg), function ($m) use (&$failed) {
                 $failed[] = $m;
             });
         };
@@ -264,5 +270,37 @@ class SiteTest extends TestCase
             ->assertOk()
             ->assertSee('gate.svg', false)
             ->assertSee('Progres Oktober 2026');
+    }
+
+    public function test_project_site_plan_upload_saves_as_compressed_avif(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->superAdmin());
+        $project = Project::first();
+
+        Livewire::test(EditProject::class, ['record' => $project->getKey()])
+            ->set('data.site_plan_image', [UploadedFile::fake()->image('siteplan.png', 2400, 1600)])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertStringEndsWith('.avif', $project->fresh()->site_plan_image);
+    }
+
+    public function test_every_image_upload_is_compressed_and_og_image_stays_jpeg(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->superAdmin());
+
+        Livewire::test(MasterIdentity::class)
+            ->set('data.logo', [UploadedFile::fake()->image('logo.png', 800, 200)])
+            ->call('save')->assertHasNoErrors();
+        Livewire::test(SeoSettings::class)
+            ->set('data.og.image', [UploadedFile::fake()->image('og.png', 2400, 1260)])
+            ->call('save')->assertHasNoErrors();
+
+        $site = Setting::current()->fresh();
+        $this->assertStringEndsWith('.avif', $site->logo);
+        $this->assertStringEndsWith('.jpg', $site->og['image']);
+        $this->assertSame(1200, getimagesizefromstring(Storage::disk('public')->get($site->og['image']))[0]);
     }
 }
