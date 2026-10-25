@@ -6,19 +6,23 @@ use App\Filament\Pages\MasterIdentity;
 use App\Filament\Pages\PageHome;
 use App\Filament\Pages\SeoSettings;
 use App\Filament\Resources\Projects\Pages\EditProject;
+use App\Filament\Resources\Shortlinks\Pages\CreateShortlink;
 use App\Models\Lead;
 use App\Models\PageView;
 use App\Models\Project;
 use App\Models\Setting;
+use App\Models\Shortlink;
 use App\Models\User;
 use App\Support\CompressedImage;
 use App\Support\SvgIcon;
+use App\Support\UIcons;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\MasanulandSeeder;
 use Database\Seeders\SeoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Vite;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -344,5 +348,63 @@ class SiteTest extends TestCase
 
         $this->actingAs($this->superAdmin())->get('/admin/leads')
             ->assertOk()->assertSee('Budi')->assertSee($project->name);
+    }
+
+    public function test_shortlink_page_shows_links_and_loads_only_used_icon_styles(): void
+    {
+        Shortlink::create([
+            'slug' => 'wiradadi', 'title' => 'MASANU RESIDENCE WIRADADI', 'subtitle' => 'Jl. Protokol Desa Wiradadi',
+            'links' => [['icon' => 'fi-brands-instagram', 'title' => 'INSTAGRAM', 'subtitle' => 'Instagram Kami', 'url' => 'https://instagram.com/masanu']],
+        ]);
+        Shortlink::create(['slug' => 'draft', 'title' => 'Draft', 'is_published' => false]);
+
+        $this->get('/l/wiradadi')->assertOk()
+            ->assertSee('<title>MASANU RESIDENCE WIRADADI', false)
+            ->assertSee('INSTAGRAM')
+            ->assertSee(Vite::asset(UIcons::DIR.'brands/all.css'), false)
+            ->assertDontSee(Vite::asset(UIcons::DIR.'thin/straight.css'), false);
+        $this->get('/l/draft')->assertNotFound();
+    }
+
+    public function test_shortlink_icons_are_searchable_and_validated_in_cms(): void
+    {
+        $this->actingAs($this->superAdmin());
+        $this->assertArrayHasKey('fi-brands-whatsapp', UIcons::search('whatsapp'));
+
+        $this->get('/admin/shortlinks/create')->assertOk()
+            ->assertSee(Vite::asset(UIcons::DIR.'thin/straight.css'), false);
+        $this->get('/admin/leads')->assertOk()
+            ->assertDontSee(Vite::asset(UIcons::DIR.'thin/straight.css'), false);
+
+        $form = fn (string $icon) => Livewire::test(CreateShortlink::class)->fillForm([
+            'title' => 'Wiradadi', 'slug' => 'wiradadi',
+            'links' => [['icon' => $icon, 'title' => 'WA', 'url' => 'https://wa.me/62812']],
+        ])->call('create');
+
+        $form('fi-rr-not-a-real-icon')->assertHasFormErrors();
+        $form('fi-brands-whatsapp')->assertHasNoFormErrors();
+        $this->assertSame('fi-brands-whatsapp', Shortlink::first()->links[0]['icon']);
+    }
+
+    public function test_shared_project_link_uses_project_name_description_and_a_jpeg_image(): void
+    {
+        Storage::fake('public');
+        $avif = imagecreatetruecolor(1600, 900);
+        ob_start();
+        imageavif($avif);
+        Storage::disk('public')->put('projects/card.avif', (string) ob_get_clean());
+
+        Setting::current()->update(['og' => ['title' => 'Masanuland', 'description' => 'Pengembang properti default']]);
+        $project = Project::published()->first();
+        $project->update(['card_image' => 'projects/card.avif', 'description' => '<p>Hunian modern &amp; asri dekat kota.</p>']);
+
+        $this->get("/perumahan/{$project->slug}")->assertOk()
+            ->assertSee('<meta property="og:title" content="'.e($project->name).'">', false)
+            ->assertSee('<meta property="og:description" content="Hunian modern &amp; asri dekat kota.">', false)
+            ->assertSee('/storage/og/', false)
+            ->assertDontSee('og:description" content="Pengembang', false);
+
+        $this->assertCount(1, Storage::disk('public')->files('og'));
+        $this->get('/')->assertSee('<meta property="og:description" content="Pengembang properti default">', false);
     }
 }

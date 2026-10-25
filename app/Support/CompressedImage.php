@@ -7,6 +7,7 @@ use Filament\Forms\Components\BaseFileUpload;
 use Filament\Forms\Components\RichEditor;
 use GdImage;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 
@@ -57,6 +58,34 @@ class CompressedImage
         rescue(fn () => $path && $disk->setVisibility($path, $visibility), report: false);
 
         return $path;
+    }
+
+    /**
+     * Preview WhatsApp/Facebook tidak membaca AVIF: buat salinan JPEG 1200 px
+     * sekali (storage/og/…), lalu pakai itu untuk og:image.
+     */
+    public static function shareable(?string $path): ?string
+    {
+        if (! $path || ! str_ends_with(strtolower($path), '.avif') || ! function_exists('imagecreatefromavif')) {
+            return $path;
+        }
+
+        $disk = Storage::disk('public');
+        $copy = 'og/'.md5($path).'.jpg';
+
+        if (! $disk->exists($copy)) {
+            $image = $disk->exists($path) ? @imagecreatefromavif($disk->path($path)) : false;
+
+            if (! $image) {
+                return $path;
+            }
+
+            ob_start();
+            imagejpeg(imagesx($image) > 1200 ? (imagescale($image, 1200) ?: $image) : $image, null, 82);
+            $disk->put($copy, (string) ob_get_clean(), 'public');
+        }
+
+        return $copy;
     }
 
     /** @return 'avif'|'webp' */

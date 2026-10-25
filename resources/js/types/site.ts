@@ -186,3 +186,21 @@ export interface SharedProps {
     navProjects: { name: string; slug: string }[];
     [key: string]: unknown;
 }
+
+export interface Shortlink {
+    slug: string;
+    title: string;
+    handle: string | null;
+    subtitle: string | null;
+    logo: string | null;
+    background: string | null;
+    button_color: string | null;
+    links:
+        | {
+              icon: string | null;
+              title: string;
+              subtitle: string | null;
+              url: string;
+          }[]
+        | null;
+}

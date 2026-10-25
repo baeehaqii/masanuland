@@ -2,7 +2,9 @@
 
 use App\Models\Project;
 use App\Models\Setting;
+use App\Models\Shortlink;
 use App\Models\Testimonial;
+use App\Support\UIcons;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -37,6 +39,16 @@ Route::post('/perumahan/{project:slug}/leads', function (Request $request, Proje
 
     return back();
 })->middleware('throttle:5,1')->name('project.leads');
+
+// Halaman link-in-bio (Proyek → Shortlink di CMS). CSS ikon hanya untuk gaya yang dipakai.
+Route::get('/l/{shortlink:slug}', function (Shortlink $shortlink) {
+    abort_unless($shortlink->is_published, 404);
+
+    return Inertia::render('shortlink', [
+        'shortlink' => $shortlink,
+        'iconCss' => UIcons::entriesFor(array_column($shortlink->links ?? [], 'icon')),
+    ]);
+})->name('shortlink');
 
 /**
  * Sitemap untuk Google Search Console. Dibangun dari data CMS, jadi perumahan

@@ -15,7 +15,25 @@ export default defineConfig({
     },
     plugins: [
         laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx'],
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.tsx',
+                // Flaticon UIcons, satu entry per gaya — samakan dengan App\Support\UIcons::STYLES.
+                ...[
+                    'regular/rounded',
+                    'regular/straight',
+                    'bold/rounded',
+                    'bold/straight',
+                    'solid/rounded',
+                    'solid/straight',
+                    'thin/rounded',
+                    'thin/straight',
+                    'brands/all',
+                ].map(
+                    (style) =>
+                        `node_modules/@flaticon/flaticon-uicons/css/${style}.css`,
+                ),
+            ],
             refresh: true,
             fonts: [
                 bunny('Poppins', {

@@ -15,8 +15,8 @@
 
         <meta property="og:type" content="{{ data_get($site->og, 'type', 'website') }}">
         <meta property="og:site_name" content="{{ data_get($site->og, 'site_name') ?: $site->brand_name }}">
-        <meta property="og:title" content="{{ data_get($site->og, 'title') ?: $seo['title'] }}">
-        <meta property="og:description" content="{{ data_get($site->og, 'description') ?: $seo['description'] }}">
+        <meta property="og:title" content="{{ $seo['og_title'] }}">
+        <meta property="og:description" content="{{ $seo['og_description'] }}">
         <meta property="og:url" content="{{ url()->current() }}">
         <meta property="og:locale" content="id_ID">
         @if ($seo['image'])
@@ -33,7 +33,7 @@
         @fonts
 
         @viteReactRefresh
-        @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])
+        @vite(['resources/css/app.css', 'resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx", ...($page['props']['iconCss'] ?? [])])
 
         {{-- Warna dari /admin → Pengaturan → Warna & Tampilan. Dimuat setelah
              stylesheet supaya menimpa tema bawaan Tailwind. --}}

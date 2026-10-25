@@ -2,6 +2,10 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Resources\Shortlinks\Pages\CreateShortlink;
+use App\Filament\Resources\Shortlinks\Pages\EditShortlink;
+use App\Filament\Resources\Shortlinks\Pages\ListShortlinks;
+use App\Support\UIcons;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -11,9 +15,11 @@ use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Icons\Heroicon;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
+use Illuminate\Foundation\Vite;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
@@ -56,6 +62,12 @@ class AdminPanelProvider extends PanelProvider
                 'Master Data',
                 'Pengaturan',
             ])
+            // Font ikon Flaticon hanya untuk halaman Shortlink, supaya panel lain tetap ringan.
+            ->renderHook(
+                PanelsRenderHook::HEAD_END,
+                fn () => app(Vite::class)(UIcons::entries()),
+                scopes: [ListShortlinks::class, CreateShortlink::class, EditShortlink::class],
+            )
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->middleware([
                 EncryptCookies::class,
