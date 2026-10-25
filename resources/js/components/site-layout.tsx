@@ -319,22 +319,60 @@ function Header() {
 
 export function CtaBand() {
     const { site } = useSite();
+    const subtitle =
+        site.buttons?.cta_subtitle ??
+        'Konsultasikan pilihan rumah, simulasi KPR, dan jadwal survei bersama tim marketing kami.';
 
     return (
-        <section className="bg-maroon">
-            <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-5 px-4 py-10 text-center sm:flex-row sm:text-left lg:px-8">
-                <h2 className="text-xl font-extrabold tracking-tight text-white uppercase underline decoration-gold decoration-4 underline-offset-8 sm:text-3xl">
-                    {site.buttons?.cta_title ?? 'Info Lebih Lanjut, Klik'}
-                </h2>
-                <a
-                    href={waLink(site)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-full bg-white px-6 font-bold text-maroon shadow-lg transition hover:bg-maroon-50 active:scale-[0.98]"
-                >
-                    <MessageCircle className="size-5" />{' '}
-                    {site.buttons?.cta_label ?? site.phone ?? 'Hubungi Kami'}
-                </a>
+        <section className="relative isolate overflow-hidden bg-linear-to-br from-maroon-700 via-maroon to-maroon-900">
+            {/* Pola lingkaran ala bola kaca di kanan; dekorasi saja. */}
+            <div
+                aria-hidden="true"
+                className="absolute inset-y-0 right-0 -z-10 w-2/3 opacity-60 sm:w-1/2 sm:opacity-100"
+            >
+                <span className="absolute top-1/2 right-[18%] size-72 -translate-y-1/3 rounded-full bg-radial-[at_30%_25%] from-white/35 via-white/10 to-transparent to-70% sm:size-96" />
+                <span className="absolute -top-24 right-[4%] size-80 rounded-full bg-radial-[at_35%_30%] from-white/30 via-white/5 to-transparent to-70% sm:size-[26rem]" />
+                <span className="absolute top-1/3 -right-10 size-44 rounded-full bg-radial-[at_30%_30%] from-white/30 via-white/10 to-transparent to-70% sm:size-56" />
+            </div>
+
+            <div className="mx-auto max-w-7xl px-4 py-14 sm:py-16 lg:px-8 lg:py-20">
+                <div className="max-w-2xl">
+                    <h2 className="text-2xl font-extrabold tracking-tight text-white sm:text-3xl">
+                        {site.buttons?.cta_title ?? 'Info Lebih Lanjut, Klik'}
+                    </h2>
+                    {subtitle && (
+                        <p className="mt-4 text-base text-maroon-100 sm:text-lg">
+                            {subtitle}
+                        </p>
+                    )}
+                    <div className="mt-8 flex flex-wrap gap-3">
+                        <a
+                            href={
+                                site.brochure_url ??
+                                waLink(
+                                    site,
+                                    'Halo, mohon informasi brosur & harga.',
+                                )
+                            }
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-xl border border-white/50 px-6 font-bold text-white transition hover:border-white hover:bg-white/10 active:scale-[0.98]"
+                        >
+                            {site.buttons?.brochure_label ?? 'Brosur & Harga'}
+                        </a>
+                        <a
+                            href={waLink(site)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex min-h-12 cursor-pointer items-center gap-2 rounded-xl bg-white px-6 font-bold text-maroon shadow-lg transition hover:bg-maroon-50 active:scale-[0.98]"
+                        >
+                            <MessageCircle className="size-5" />{' '}
+                            {site.buttons?.cta_label ??
+                                site.phone ??
+                                'Hubungi Kami'}
+                        </a>
+                    </div>
+                </div>
             </div>
         </section>
     );

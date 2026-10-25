@@ -38,6 +38,7 @@ export interface Buttons {
     brochure_label?: string | null;
     detail_label?: string | null;
     cta_title?: string | null;
+    cta_subtitle?: string | null;
     cta_label?: string | null;
     footer_menu_title?: string | null;
     footer_contact_title?: string | null;

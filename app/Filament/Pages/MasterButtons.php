@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use BackedEnum;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -54,6 +55,9 @@ class MasterButtons extends SettingsPage
 
                 Section::make('CTA Bawah Halaman')->schema([
                     TextInput::make('buttons.cta_title')->label('Judul CTA')->placeholder('Info Lebih Lanjut, Klik'),
+                    Textarea::make('buttons.cta_subtitle')->label('Keterangan CTA')->rows(2)->columnSpanFull()
+                        ->placeholder('Konsultasikan pilihan rumah, simulasi KPR, dan jadwal survei bersama tim marketing kami.')
+                        ->helperText('Tombol kiri memakai Tombol Brosur & Link Brosur di atas.'),
                     TextInput::make('buttons.cta_label')->label('Teks Tombol CTA')->placeholder('0858-1050-4000')
                         ->helperText('Kosongkan untuk memakai nomor telepon.'),
                 ])->columns(2)->columnSpanFull(),

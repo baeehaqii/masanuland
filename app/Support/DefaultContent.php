@@ -31,6 +31,7 @@ class DefaultContent
                 'brochure_label' => 'Brosur & Harga',
                 'detail_label' => 'Lihat Detail',
                 'cta_title' => 'Info Lebih Lanjut, Klik',
+                'cta_subtitle' => 'Konsultasikan pilihan rumah, simulasi KPR, dan jadwal survei bersama tim marketing kami.',
                 'cta_label' => null,
                 'footer_menu_title' => 'Menu',
                 'footer_contact_title' => 'Kontak Kami',
