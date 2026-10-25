@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Support\CompressedImage;
 use BackedEnum;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
@@ -41,12 +42,12 @@ class PageHome extends SettingsPage
                 Tabs::make()->columnSpanFull()->tabs([
                     Tabs\Tab::make('Slider Header')->schema([
                         FileUpload::make('hero_slides')->label('Slider Header')
-                            ->helperText('Banner di bawah menu. Rasio 1920x786 px. Semua teks promo menyatu di gambar.')
-                            ->image()->multiple()->reorderable()->appendFiles()
-                            ->directory('site')->columnSpanFull(),
+                            ->helperText('Banner di bawah menu. Rasio 1920x786 px. Semua teks promo menyatu di gambar. Geser gambar untuk mengatur urutan tampil (paling kiri = pertama). Otomatis dikompres ke AVIF saat disimpan.')
+                            ->image()->multiple()->reorderable()->appendFiles()->panelLayout('grid')
+                            ->directory('site')->saveUploadedFileUsing(CompressedImage::store(...))->columnSpanFull(),
                         FileUpload::make('hero_image')->label('Gambar Cadangan')
                             ->helperText('Dipakai kalau slider di atas kosong.')
-                            ->image()->directory('site'),
+                            ->image()->directory('site')->saveUploadedFileUsing(CompressedImage::store(...)),
                     ])->columns(2),
 
                     Tabs\Tab::make('Bagian Tentang')->schema([
@@ -57,7 +58,7 @@ class PageHome extends SettingsPage
                         TagsInput::make('about_points')->label('Poin Keunggulan')->columnSpanFull()
                             ->helperText('Tekan Enter tiap selesai satu poin. Dipakai bersama halaman Tentang Kami.'),
                         TextInput::make('page_home.about_link_label')->label('Teks Tombol')->placeholder('Selengkapnya'),
-                        FileUpload::make('page_home.about_image')->label('Gambar / Foto Fasad')->image()->directory('site'),
+                        FileUpload::make('page_home.about_image')->label('Gambar / Foto Fasad')->image()->directory('site')->saveUploadedFileUsing(CompressedImage::store(...)),
                     ])->columns(2),
 
                     Tabs\Tab::make('Bagian Perumahan')->schema([

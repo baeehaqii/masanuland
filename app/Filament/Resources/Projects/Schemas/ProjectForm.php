@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Projects\Schemas;
 
+use App\Support\CompressedImage;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -39,11 +40,11 @@ class ProjectForm
                 ])->columns(2),
 
                 Tabs\Tab::make('Media')->schema([
-                    FileUpload::make('card_image')->label('Gambar Kartu')->image()->directory('projects'),
-                    FileUpload::make('hero_image')->label('Gambar Hero')->image()->directory('projects'),
-                    FileUpload::make('site_plan_image')->label('Site Plan')->image()->directory('projects'),
+                    FileUpload::make('card_image')->label('Gambar Kartu')->image()->directory('projects')->saveUploadedFileUsing(CompressedImage::store(...)),
+                    FileUpload::make('hero_image')->label('Gambar Hero')->image()->directory('projects')->saveUploadedFileUsing(CompressedImage::store(...)),
+                    FileUpload::make('site_plan_image')->label('Site Plan')->image()->directory('projects')->saveUploadedFileUsing(CompressedImage::store(...)),
                     FileUpload::make('gallery')->label('Galeri / Update Terkini')
-                        ->image()->multiple()->reorderable()->directory('projects')->columnSpanFull(),
+                        ->image()->multiple()->reorderable()->panelLayout('grid')->directory('projects')->saveUploadedFileUsing(CompressedImage::store(...))->columnSpanFull(),
                     TextInput::make('update_video')->label('Video Update Terkini (YouTube)')
                         ->url()->columnSpanFull(),
                 ])->columns(3),

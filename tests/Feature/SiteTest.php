@@ -2,14 +2,19 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\PageHome;
 use App\Models\PageView;
 use App\Models\Project;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\CompressedImage;
 use Database\Seeders\DatabaseSeeder;
 use Database\Seeders\MasanulandSeeder;
 use Database\Seeders\SeoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -212,5 +217,20 @@ class SiteTest extends TestCase
 
         $this->assertIsInt($type->price);
         $this->assertGreaterThan(0, $type->price);
+    }
+
+    public function test_banner_upload_is_stored_as_compressed_avif(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->superAdmin());
+
+        Livewire::test(PageHome::class)
+            ->set('data.hero_slides', [UploadedFile::fake()->image('banner.jpg', 3000, 1228)])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $path = Setting::current()->fresh()->hero_slides[0];
+        $this->assertStringEndsWith('.avif', $path);
+        $this->assertSame(CompressedImage::MAX_WIDTH, getimagesizefromstring(Storage::disk('public')->get($path))[0]);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Projects\RelationManagers;
 
+use App\Support\CompressedImage;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -31,7 +32,7 @@ class HouseTypesRelationManager extends RelationManager
                 ->prefix('Rp')->numeric()
                 ->mask(RawJs::make("\$money(\$input, ',', '.', 0)"))
                 ->stripCharacters('.'),
-            FileUpload::make('image')->label('Gambar')->image()->directory('house-types'),
+            FileUpload::make('image')->label('Gambar')->image()->directory('house-types')->saveUploadedFileUsing(CompressedImage::store(...)),
             TextInput::make('brochure_url')->label('Link Brosur')->url(),
             TextInput::make('sort')->label('Urutan')->numeric()->default(0),
             Repeater::make('specs')
