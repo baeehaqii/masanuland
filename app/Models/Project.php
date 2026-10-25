@@ -15,6 +15,7 @@ class Project extends Model
         'distances' => 'array',
         'features' => 'array',
         'gallery' => 'array',
+        'progress_videos' => 'array',
         'is_published' => 'boolean',
     ];
 

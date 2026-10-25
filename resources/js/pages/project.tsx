@@ -32,6 +32,7 @@ export default function ProjectPage({ project }: { project: Project }) {
         .filter(Boolean) as string[];
     const updateVideo = embedUrl(project.update_video);
     const locationVideo = embedUrl(project.location_video);
+    const progressVideos = project.progress_videos ?? [];
     const map = mapSrc(project.map_embed);
     const wa = (extra?: string) =>
         waLink(
@@ -158,7 +159,7 @@ export default function ProjectPage({ project }: { project: Project }) {
 
             {/* Description */}
             {project.description && (
-                <section className="py-14 sm:py-16 lg:py-24">
+                <section className="pt-12 sm:pt-14 lg:pt-16">
                     <div
                         className="prose prose-maroon mx-auto max-w-3xl px-4 text-maroon-900/80"
                         dangerouslySetInnerHTML={{
@@ -170,7 +171,7 @@ export default function ProjectPage({ project }: { project: Project }) {
 
             {/* Features */}
             {(project.features ?? []).length > 0 && (
-                <section className="py-14 sm:py-16 lg:py-24">
+                <section className="pt-12 pb-14 sm:pt-14 sm:pb-16 lg:pt-16 lg:pb-24">
                     <div className="mx-auto max-w-7xl px-4 lg:px-8">
                         <SectionHeading
                             title={
@@ -180,17 +181,26 @@ export default function ProjectPage({ project }: { project: Project }) {
                         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             {project.features!.map((feature) => (
                                 <div
-                                    key={feature}
+                                    key={feature.label}
                                     className="flex items-center gap-3 rounded-xl border border-maroon-100 bg-white p-4 shadow-sm"
                                 >
-                                    <span className="grid size-8 shrink-0 place-items-center rounded-full bg-maroon text-white">
-                                        <Check
-                                            className="size-4"
-                                            strokeWidth={3}
+                                    {feature.icon ? (
+                                        <img
+                                            src={img(feature.icon)}
+                                            alt=""
+                                            loading="lazy"
+                                            className="size-10 shrink-0 object-contain"
                                         />
-                                    </span>
+                                    ) : (
+                                        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-maroon text-white">
+                                            <Check
+                                                className="size-4"
+                                                strokeWidth={3}
+                                            />
+                                        </span>
+                                    )}
                                     <span className="font-semibold">
-                                        {feature}
+                                        {feature.label}
                                     </span>
                                 </div>
                             ))}
@@ -420,6 +430,35 @@ export default function ProjectPage({ project }: { project: Project }) {
                                 </a>
                             </div>
                         )}
+                    </div>
+                </section>
+            )}
+
+            {/* Progres pembangunan (YouTube Shorts) */}
+            {progressVideos.length > 0 && (
+                <section className="py-14 sm:py-16 lg:py-24">
+                    <div className="mx-auto max-w-7xl px-4 lg:px-8">
+                        <SectionHeading
+                            title={page.progress_title ?? 'Progres Pembangunan'}
+                        />
+                        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
+                            {progressVideos.map((video) => (
+                                <figure key={`${video.url}-${video.label}`}>
+                                    <div className="aspect-9/16 overflow-hidden rounded-2xl bg-maroon-900 shadow-lg">
+                                        <iframe
+                                            src={embedUrl(video.url)}
+                                            title={`${video.label} — ${project.name}`}
+                                            allowFullScreen
+                                            loading="lazy"
+                                            className="size-full"
+                                        />
+                                    </div>
+                                    <figcaption className="mt-3 text-center text-sm font-bold text-maroon-900">
+                                        {video.label}
+                                    </figcaption>
+                                </figure>
+                            ))}
+                        </div>
                     </div>
                 </section>
             )}

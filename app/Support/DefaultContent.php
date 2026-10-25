@@ -135,6 +135,7 @@ class DefaultContent
                 'types_tab' => 'Denah & Tipe',
                 'update_title' => 'Update Terkini',
                 'location_title' => 'Lokasi',
+                'progress_title' => 'Progres Pembangunan',
                 'maps_label' => 'Buka di Google Maps',
             ],
 

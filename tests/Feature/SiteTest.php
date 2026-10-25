@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\PageHome;
+use App\Filament\Resources\Projects\Schemas\ProjectForm;
 use App\Models\PageView;
 use App\Models\Project;
 use App\Models\Setting;
@@ -232,5 +233,36 @@ class SiteTest extends TestCase
         $path = Setting::current()->fresh()->hero_slides[0];
         $this->assertStringEndsWith('.avif', $path);
         $this->assertSame(CompressedImage::MAX_WIDTH, getimagesizefromstring(Storage::disk('public')->get($path))[0]);
+    }
+
+    public function test_svg_icon_with_script_is_rejected(): void
+    {
+        $failed = [];
+        $check = function (string $svg) use (&$failed) {
+            ProjectForm::safeSvg()('icon', UploadedFile::fake()->createWithContent('i.svg', $svg), function ($m) use (&$failed) {
+                $failed[] = $m;
+            });
+        };
+
+        $check('<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0h24v24H0z" fill="#7a1020"/></svg>');
+        $this->assertSame([], $failed);
+
+        $check('<svg><script>alert(1)</script></svg>');
+        $check('<svg onload="alert(1)"></svg>');
+        $this->assertCount(2, $failed);
+    }
+
+    public function test_project_page_shows_feature_icons_and_progress_videos(): void
+    {
+        $project = Project::published()->first();
+        $project->update([
+            'features' => [['label' => 'One Gate System', 'icon' => 'icons/gate.svg']],
+            'progress_videos' => [['url' => 'https://youtube.com/shorts/abcdefghijk', 'label' => 'Progres Oktober 2026']],
+        ]);
+
+        $this->get("/perumahan/{$project->slug}")
+            ->assertOk()
+            ->assertSee('gate.svg', false)
+            ->assertSee('Progres Oktober 2026');
     }
 }

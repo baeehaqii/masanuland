@@ -88,6 +88,7 @@ export interface PageProject {
     types_tab?: string | null;
     update_title?: string | null;
     location_title?: string | null;
+    progress_title?: string | null;
     maps_label?: string | null;
 }
 
@@ -150,9 +151,10 @@ export interface Project {
     price_note: string | null;
     badges: string[] | null;
     distances: Distance[] | null;
-    features: string[] | null;
+    features: { label: string; icon: string | null }[] | null;
     gallery: string[] | null;
     update_video: string | null;
+    progress_videos: { url: string; label: string }[] | null;
     location_video: string | null;
     card_image: string | null;
     hero_image: string | null;

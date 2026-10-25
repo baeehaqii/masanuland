@@ -50,6 +50,7 @@ class PageProject extends SettingsPage
                     TextInput::make('page_project.types_tab')->label('Nama Tab Denah')->placeholder('Denah & Tipe'),
                     TextInput::make('page_project.update_title')->label('Update Terkini')->placeholder('Update Terkini'),
                     TextInput::make('page_project.location_title')->label('Lokasi')->placeholder('Lokasi'),
+                    TextInput::make('page_project.progress_title')->label('Progres Pembangunan')->placeholder('Progres Pembangunan'),
                 ])->columns(2)->columnSpanFull(),
 
                 Section::make('Lain-lain')->schema([

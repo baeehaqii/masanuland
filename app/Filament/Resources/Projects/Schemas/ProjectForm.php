@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Projects\Schemas;
 
 use App\Support\CompressedImage;
+use Closure;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -14,6 +15,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Filament\Support\RawJs;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Str;
 
 class ProjectForm
@@ -47,6 +49,19 @@ class ProjectForm
                         ->image()->multiple()->reorderable()->panelLayout('grid')->directory('projects')->saveUploadedFileUsing(CompressedImage::store(...))->columnSpanFull(),
                     TextInput::make('update_video')->label('Video Update Terkini (YouTube)')
                         ->url()->columnSpanFull(),
+                    Repeater::make('progress_videos')
+                        ->label('Video Progres Pembangunan (YouTube Shorts)')
+                        ->helperText('Tampil di bawah section Lokasi, 5 video per baris. Urutkan dengan menggeser.')
+                        ->schema([
+                            TextInput::make('url')->label('Link YouTube Shorts')->url()->required()
+                                ->placeholder('https://youtube.com/shorts/xxxxxxxxxxx'),
+                            TextInput::make('label')->label('Keterangan Progres')->required()
+                                ->placeholder('Progres Oktober 2026'),
+                        ])
+                        ->columns(2)
+                        ->reorderable()
+                        ->defaultItems(0)
+                        ->columnSpanFull(),
                 ])->columns(3),
 
                 Tabs\Tab::make('Detail')->schema([
@@ -60,8 +75,20 @@ class ProjectForm
                         ->columns(2)
                         ->defaultItems(0)
                         ->columnSpanFull(),
-                    TagsInput::make('features')->label('Fasilitas & Keunggulan')
-                        ->placeholder('One Gate System')->columnSpanFull(),
+                    Repeater::make('features')
+                        ->label('Fasilitas & Keunggulan')
+                        ->schema([
+                            FileUpload::make('icon')->label('Ikon (SVG)')
+                                ->acceptedFileTypes(['image/svg+xml'])
+                                ->rules([static::safeSvg()])
+                                ->directory('icons'),
+                            TextInput::make('label')->label('Keterangan')->required()->placeholder('One Gate System'),
+                        ])
+                        ->columns(2)
+                        ->grid(2)
+                        ->reorderable()
+                        ->defaultItems(0)
+                        ->columnSpanFull(),
                 ]),
 
                 Tabs\Tab::make('Lokasi & Brosur')->schema([
@@ -75,6 +102,23 @@ class ProjectForm
 
             Section::make()->schema([])->hidden(),
         ]);
+    }
+
+    /**
+     * SVG bisa membawa JavaScript yang jalan kalau file-nya dibuka langsung
+     * dari /storage, jadi tolak yang berisi script, event handler, atau link javascript:.
+     */
+    public static function safeSvg(): Closure
+    {
+        return static function (string $attribute, mixed $value, Closure $fail): void {
+            if (! $value instanceof UploadedFile) {
+                return;
+            }
+
+            if (preg_match('/<script|\son\w+\s*=|javascript:|<foreignObject/i', (string) file_get_contents($value->getRealPath()))) {
+                $fail('SVG mengandung script dan tidak boleh diunggah.');
+            }
+        };
     }
 
     /** Input harga: dipisah titik saat diketik, disimpan sebagai angka bulat. */
