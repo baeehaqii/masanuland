@@ -6,7 +6,10 @@ use Closure;
 use Filament\Forms\Components\FileUpload;
 use Illuminate\Http\UploadedFile;
 
-/** Upload ikon yang hanya menerima SVG — dipakai fasilitas perumahan & kartu alasan beranda. */
+/**
+ * Upload ikon yang hanya menerima SVG — fasilitas perumahan, kartu alasan beranda,
+ * spesifikasi tipe rumah. safe() dipasang di semua FileUpload (AppServiceProvider).
+ */
 class SvgIcon
 {
     public static function upload(string $name = 'icon'): FileUpload
@@ -14,8 +17,6 @@ class SvgIcon
         return FileUpload::make($name)->label('Ikon (SVG)')
             ->helperText('Hanya file .svg')
             ->acceptedFileTypes(['image/svg+xml'])
-            // Filament meng-evaluate closure di rules(), jadi rule-nya dibungkus satu lapis.
-            ->rules([fn (): Closure => static::safe()])
             ->directory('icons');
     }
 
@@ -26,7 +27,7 @@ class SvgIcon
     public static function safe(): Closure
     {
         return static function (string $attribute, mixed $value, Closure $fail): void {
-            if (! $value instanceof UploadedFile) {
+            if (! $value instanceof UploadedFile || $value->getMimeType() !== 'image/svg+xml') {
                 return;
             }
 

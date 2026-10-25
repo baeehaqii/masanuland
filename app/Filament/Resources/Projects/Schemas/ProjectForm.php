@@ -44,7 +44,8 @@ class ProjectForm
                     FileUpload::make('card_image')->label('Gambar Kartu')->image()->directory('projects'),
                     FileUpload::make('hero_image')->label('Gambar Hero')->image()->directory('projects'),
                     FileUpload::make('site_plan_image')->label('Site Plan')->image()->directory('projects'),
-                    FileUpload::make('gallery')->label('Galeri / Update Terkini')
+                    FileUpload::make('gallery')->label('Galeri Foto (slider halaman detail)')
+                        ->helperText('Foto pertama slider diambil dari Gambar Hero, lalu foto-foto di sini sesuai urutan.')
                         ->image()->multiple()->reorderable()->panelLayout('grid')->directory('projects')->columnSpanFull(),
                 ])->columns(3),
 

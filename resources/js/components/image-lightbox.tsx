@@ -1,7 +1,12 @@
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
-export type LightboxState = { images: string[]; index: number; alt: string };
+export type LightboxState = {
+    images: string[];
+    index: number;
+    alt: string;
+    captions?: string[];
+};
 
 /**
  * Gambar ukuran penuh di atas latar blur. Pakai <dialog> bawaan browser:
@@ -56,6 +61,12 @@ export default function ImageLightbox({
                         alt={state.alt}
                         className="max-h-[90dvh] max-w-[94vw] rounded-2xl bg-white object-contain shadow-2xl"
                     />
+
+                    {state.captions?.[state.index] && (
+                        <p className="absolute top-3 left-3 rounded-full bg-maroon-900/80 px-4 py-2 text-sm font-bold text-white">
+                            {state.captions[state.index]}
+                        </p>
+                    )}
 
                     <button
                         type="button"

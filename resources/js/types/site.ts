@@ -1,7 +1,11 @@
 export type Stat = { value: string; label: string };
 export type Social = { label: string; url: string };
 export type Distance = { minutes: number | string; place: string };
-export type Spec = { count: number | string; label: string };
+export type Spec = {
+    count: number | string;
+    label: string;
+    icon?: string | null;
+};
 
 export type MenuItem = {
     label: string;
@@ -137,6 +141,7 @@ export interface HouseType {
     id: number;
     name: string;
     image: string | null;
+    floor_plans: { image: string; label: string }[] | null;
     price: number | null;
     specs: Spec[] | null;
     brochure_url: string | null;

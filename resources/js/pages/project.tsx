@@ -7,7 +7,6 @@ import {
     Clock,
     Download,
     Expand,
-    Home as HomeIcon,
     MapPin,
     MessageCircle,
     Navigation,
@@ -15,6 +14,7 @@ import {
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 
+import HouseTypeCard from '@/components/house-type-card';
 import ImageLightbox from '@/components/image-lightbox';
 import type { LightboxState } from '@/components/image-lightbox';
 import SectionHeading from '@/components/section-heading';
@@ -23,6 +23,13 @@ import { embedUrl, img, mapSrc, rupiah, waLink } from '@/lib/site';
 import type { Project, SharedProps } from '@/types/site';
 
 type TabId = 'siteplan' | 'denah';
+
+/** 1 tipe di tengah, 2 tipe berdua, 3+ tipe tiga per baris. */
+const typeGrid: Record<number, string> = {
+    1: 'mx-auto max-w-xl',
+    2: 'md:grid-cols-2',
+    3: 'md:grid-cols-2 lg:grid-cols-3',
+};
 
 export default function ProjectPage({ project }: { project: Project }) {
     const { site } = usePage<SharedProps>().props;
@@ -84,7 +91,9 @@ export default function ProjectPage({ project }: { project: Project }) {
                     <div className="rounded-3xl border border-maroon-100 bg-white p-3 shadow-sm sm:p-5 lg:col-span-2">
                         {photos.length > 0 ? (
                             <div className="grid gap-3 sm:grid-cols-4">
-                                <div className="relative overflow-hidden rounded-2xl bg-maroon-50 sm:col-span-3">
+                                <div
+                                    className={`relative overflow-hidden rounded-2xl bg-maroon-50 ${photos.length > 1 ? 'sm:col-span-3' : 'sm:col-span-4'}`}
+                                >
                                     <img
                                         src={photos[active]}
                                         alt={project.name}
@@ -504,114 +513,27 @@ export default function ProjectPage({ project }: { project: Project }) {
                                 id="panel-denah"
                                 aria-labelledby="tab-denah"
                             >
-                                <div className="grid gap-6 lg:grid-cols-2">
-                                    {project.house_types!.map((type) => {
-                                        const photo = img(type.image);
-
-                                        return (
-                                            <article
-                                                key={type.id}
-                                                className="overflow-hidden rounded-2xl border border-maroon-100 bg-white shadow-sm"
-                                            >
-                                                <div className="aspect-16/10 bg-maroon-50">
-                                                    {photo ? (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                setLightbox({
-                                                                    images: [
-                                                                        photo,
-                                                                    ],
-                                                                    index: 0,
-                                                                    alt: type.name,
-                                                                })
-                                                            }
-                                                            aria-label={`Perbesar denah ${type.name}`}
-                                                            className="block size-full cursor-zoom-in"
-                                                        >
-                                                            <img
-                                                                src={photo}
-                                                                alt={type.name}
-                                                                loading="lazy"
-                                                                className="size-full object-cover"
-                                                            />
-                                                        </button>
-                                                    ) : (
-                                                        <div className="grid size-full place-items-center text-maroon-200">
-                                                            <HomeIcon className="size-10" />
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <div className="p-6">
-                                                    <h3 className="text-xl font-extrabold text-maroon-900 sm:text-2xl">
-                                                        {type.name}
-                                                    </h3>
-
-                                                    <dl className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                                                        {(type.specs ?? []).map(
-                                                            (spec) => (
-                                                                <div
-                                                                    key={
-                                                                        spec.label
-                                                                    }
-                                                                    className="rounded-xl bg-maroon-50 px-3 py-2.5 text-center"
-                                                                >
-                                                                    <dt className="text-lg font-extrabold text-maroon">
-                                                                        {
-                                                                            spec.count
-                                                                        }
-                                                                    </dt>
-                                                                    <dd className="text-[11px] leading-tight font-medium text-maroon-900/70">
-                                                                        {
-                                                                            spec.label
-                                                                        }
-                                                                    </dd>
-                                                                </div>
-                                                            ),
-                                                        )}
-                                                    </dl>
-
-                                                    <p className="mt-5 text-xs font-semibold tracking-widest text-maroon-900/50 uppercase">
-                                                        {page.price_label ??
-                                                            'Harga'}
-                                                    </p>
-                                                    <p className="text-xl font-extrabold text-maroon">
-                                                        {rupiah(type.price) ??
-                                                            page.price_empty ??
-                                                            'Hubungi CS'}
-                                                    </p>
-
-                                                    <div className="mt-5 flex flex-wrap gap-2">
-                                                        {(type.brochure_url ??
-                                                            project.brochure_url) && (
-                                                            <a
-                                                                href={
-                                                                    type.brochure_url ??
-                                                                    project.brochure_url!
-                                                                }
-                                                                target="_blank"
-                                                                rel="noreferrer"
-                                                                className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-gold px-4 text-sm font-bold text-maroon-900 transition hover:bg-gold-dark active:scale-[0.98]"
-                                                            >
-                                                                <Download className="size-4" />{' '}
-                                                                Download Brosur
-                                                            </a>
-                                                        )}
-                                                        <a
-                                                            href={wa(type.name)}
-                                                            target="_blank"
-                                                            rel="noreferrer"
-                                                            className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-wa px-4 text-sm font-bold text-white transition hover:bg-wa-dark active:scale-[0.98]"
-                                                        >
-                                                            <MessageCircle className="size-4" />{' '}
-                                                            Whatsapp
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </article>
-                                        );
-                                    })}
+                                <div
+                                    className={`grid gap-6 ${typeGrid[Math.min(project.house_types!.length, 3)]}`}
+                                >
+                                    {project.house_types!.map((type) => (
+                                        <HouseTypeCard
+                                            key={type.id}
+                                            type={type}
+                                            brochureUrl={
+                                                type.brochure_url ??
+                                                project.brochure_url
+                                            }
+                                            waHref={wa(type.name)}
+                                            priceLabel={
+                                                page.price_label ?? 'Harga'
+                                            }
+                                            priceEmpty={
+                                                page.price_empty ?? 'Hubungi CS'
+                                            }
+                                            onOpen={setLightbox}
+                                        />
+                                    ))}
                                 </div>
                             </div>
                         )}

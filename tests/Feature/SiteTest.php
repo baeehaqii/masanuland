@@ -303,4 +303,29 @@ class SiteTest extends TestCase
         $this->assertStringEndsWith('.jpg', $site->og['image']);
         $this->assertSame(1200, getimagesizefromstring(Storage::disk('public')->get($site->og['image']))[0]);
     }
+
+    public function test_any_image_field_rejects_svg_with_script(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->superAdmin());
+
+        Livewire::test(PageHome::class)
+            ->set('data.hero_image', [UploadedFile::fake()->createWithContent('x.svg', '<svg onload="alert(1)"></svg>')])
+            ->call('save')
+            ->assertHasErrors();
+    }
+
+    public function test_house_type_floor_plans_are_shown(): void
+    {
+        $project = Project::published()->first();
+        $project->houseTypes()->first()->update([
+            'floor_plans' => [['image' => 'house-types/lt1.avif', 'label' => 'Denah Lantai 1']],
+            'specs' => [['count' => 2, 'label' => 'Kamar Tidur', 'icon' => 'icons/bed.svg']],
+        ]);
+
+        $this->get("/perumahan/{$project->slug}")
+            ->assertOk()
+            ->assertSee('Denah Lantai 1')
+            ->assertSee('bed.svg', false);
+    }
 }
